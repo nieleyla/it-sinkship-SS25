@@ -16,12 +16,13 @@ body {
 }
 
 .limiter {
-    background-color: #00000020;
     width: 90%;
     margin: 0 auto;
     height: 100%;
     display: flex;
     flex-direction: column;
+    max-width: 1000px;
+    padding: 20px;
 }
 
 header {
@@ -40,4 +41,31 @@ footer {
     background-color: #3171ba;
     padding: 20px;
     text-align: center;
+}
+
+.controls {
+    background-color: darkred;
+    width: 80%;
+    height: 3em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fields {
+    background-color: #3aba31;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1em;
+    padding: 1em;
+}
+
+.field {
+    background-color: #ffffff;
+    aspect-ratio: 1 / 1;
+    flex: 1 1 300px;
+    max-width: 400px;
+    border: 2px solid #000000;
 }
