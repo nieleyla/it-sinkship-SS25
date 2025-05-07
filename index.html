@@ -14,12 +14,13 @@
             <h1>Sink Ship</h1>
         </header>
         <main>
-            <div class="controls"></div>
+            <div class="controls">
+                <button class="button">Build</button>
+                <button class="button">Start</button>
+            </div>
             <div class="fields">
                 <div class="field" id="playerfield">
-                    <div class="cell">
-                        <div class="water"></div>
-                    </div>
+                    <div class="cell water"></div>
                     <div class="cell"></div>
                     <div class="cell"></div>
                     <div class="cell"></div>
@@ -40,9 +41,9 @@
                     <div class="cell"></div>
                     <div class="cell"></div>
                     <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
-                    <div class="cell"></div>
+                    <div class="cell left"></div>
+                    <div class="cell horizontal"></div>
+                    <div class="cell right"></div>
                     <div class="cell"></div>
                     <div class="cell"></div>
                     <div class="cell"></div>
@@ -120,7 +121,20 @@
                     <div class="cell"></div>
                     <div class="cell"></div>
                 </div>
-                <div class="field" id="computerfield"></div>
+                <div class="field" id="computerfield">
+                    <table>
+                        <tr>
+                            <th>Zahl</th>
+                            <th>Typ</th>
+                            <th>Größe</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>Schiff</td>
+                            <td>2</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </main>
         <footer>
