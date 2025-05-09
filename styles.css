@@ -89,24 +89,9 @@ footer {
 
 #computerfield {
     display: flex;
-    justify-content: center;
     align-items: flex-start;
-    padding: 1em;
     color: black;
   }
-
-#computerfield table {
-    width: 90%;
-    max-width: 300px;
-    table-layout: fixed;
-    border-collapse: collapse;
-}
-
-#computerfield th,
-#computerfield td {
-    padding: 0.5em;
-    text-align: left;
-}
 
 .cell {
     border: 1px solid #000000;
@@ -133,4 +118,9 @@ footer {
 .right {
     background-color: #082341;
     background-position: -200% -200%;
+}
+
+table.h, table.v {
+    width: 32px;
+    height: 32px;
 }
