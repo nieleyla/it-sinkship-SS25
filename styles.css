@@ -91,6 +91,8 @@ footer {
     display: flex;
     align-items: flex-start;
     color: black;
+    justify-content: center;
+    padding-top: 2em;
   }
 
 .cell {
@@ -120,7 +122,37 @@ footer {
     background-position: -200% -200%;
 }
 
-table.h, table.v {
-    width: 32px;
-    height: 32px;
+.ship-option {
+    display: inline-block;
+    width: 30px;
+    height: 7px;
+    background-color: rgb(57, 57, 57);
+    border: 1px solid black;
+    cursor: pointer;
+  }
+  
+.ship-option.v {
+    width: 7px;
+    height: 30px;
+}
+
+td {
+    padding: 0.5em 0.5em;
+    text-align: center;
+}
+
+th {
+    padding: 0.5em 0.5em;
+    text-align: left;
+}
+  
+tbody td:nth-child(4) {
+    text-align: left;
+}
+
+tbody td:nth-child(2), td:nth-child(3) {
+    border: 2px solid #000000;
+    background-color: #3171ba;
+    border-radius: 10px;
+    min-width: 50px;
 }
