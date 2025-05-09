@@ -9,10 +9,15 @@ html, body {
 }
 
 body {
-    background-color: #003768;
-    color: #ffffff;
+    margin: 0;
+    height: 100vh;
+    background-image: url('images/mainbg.webp');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
     display: flex;
     flex-direction: column;
+    background-attachment: fixed;
 }
 
 .limiter {
@@ -28,25 +33,25 @@ body {
 
 header {
     height: 10%;
-    background-color: #165eb0;
     padding: 20px;
+    color: rgb(0, 0, 0);
+    font-size: 1.5em;
 }
 
 main {
-    background-color: #ffffff;
     flex-grow: 1;
 }
 
 footer {
     height: 5%;
-    background-color: #3171ba;
     padding: 20px;
-    text-align: center;
+    text-align: left;
+    color: aliceblue;
 }
 
 .controls {
-    background-color: darkred;
     width: 80%;
+    height: 5%;
     margin: 1em auto;
     display: flex;
     justify-content: center;
@@ -54,19 +59,20 @@ footer {
 }
 
 .button {
-    background-color: #3171ba;
-    color: #ffffff;
-    border: rgb(16, 17, 43) solid 1px;
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
     margin: 0.5em;
     width: 30%;
+    margin-left: 2em;
+    margin-right: 2em;
 }
 
 .fields {
-    background-color: #aeaeae;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -77,11 +83,14 @@ footer {
 }
 
 .field {
-    background-color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 1em;
     aspect-ratio: 1 / 1;
     flex: 1 1 300px;
     max-width: 400px;
-    border: 2px solid #000000;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(10, 1fr);
@@ -89,10 +98,10 @@ footer {
 
 #computerfield {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     color: black;
     justify-content: center;
-    padding-top: 2em;
+    padding: 1em;
   }
 
 .cell {
@@ -151,8 +160,8 @@ tbody td:nth-child(4) {
 }
 
 tbody td:nth-child(2), td:nth-child(3) {
-    border: 2px solid #000000;
-    background-color: #3171ba;
+    border: 2px solid #76aae6;
+    background-color: #76aae6;
     border-radius: 10px;
-    min-width: 50px;
+    width: 50px;
 }
