@@ -28,7 +28,7 @@ body {
 
 header {
     height: 10%;
-    background-color: #002147;
+    background-color: #165eb0;
     padding: 20px;
 }
 
@@ -88,13 +88,25 @@ footer {
 }
 
 #computerfield {
-    width: auto;
-    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
     padding: 1em;
-    background: #ffffff;
-    border: 2px solid #000000;
     color: black;
   }
+
+#computerfield table {
+    width: 90%;
+    max-width: 300px;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+#computerfield th,
+#computerfield td {
+    padding: 0.5em;
+    text-align: left;
+}
 
 .cell {
     border: 1px solid #000000;
