@@ -70,6 +70,18 @@ footer {
     width: 30%;
     margin-left: 2em;
     margin-right: 2em;
+    color: rgb(0, 0, 0);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.button:hover {
+    background: rgba(255, 255, 255, 0.1); /* slightly darker */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); /* soft glow */
+}
+
+.button:active {
+    transform: scale(0.97);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .fields {
@@ -113,21 +125,21 @@ footer {
 }
 
 .water {
-    background-color: #082341;
+    background-color: #083569;
 }
 
 .left {
-    background-color: #082341;
+    background-color: #083569;
     background-position: 0 -200%;
 }
 
 .horizontal {
-    background-color: #082341;
+    background-color: #083569;
     background-position: -100% -200%;
 }
 
 .right {
-    background-color: #082341;
+    background-color: #083569;
     background-position: -200% -200%;
 }
 
@@ -137,7 +149,6 @@ footer {
     height: 7px;
     background-color: rgb(57, 57, 57);
     border: 1px solid black;
-    cursor: pointer;
   }
   
 .ship-option.v {
@@ -160,8 +171,21 @@ tbody td:nth-child(4) {
 }
 
 tbody td:nth-child(2), td:nth-child(3) {
-    border: 2px solid #76aae6;
-    background-color: #76aae6;
+    border: 2px solid #cdefff;
+    background-color: #cdefff;
     border-radius: 10px;
     width: 50px;
+    transition: background-color 0.2s ease;
+}
+
+tbody td:nth-child(2):hover,
+tbody td:nth-child(3):hover {
+  background-color: #5a90c8;
+  cursor: pointer;
+}
+
+tbody td:nth-child(2):active,
+tbody td:nth-child(3):active {
+    transform: scale(0.97);
+    background: rgba(255, 255, 255, 0.05);
 }
