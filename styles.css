@@ -108,7 +108,7 @@ footer {
     grid-template-rows: repeat(10, 1fr);
 }
 
-#computerfield {
+#menu {
     display: flex;
     align-items: center;
     color: black;
