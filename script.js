@@ -56,12 +56,14 @@ const sinkship = {
 
     /// Create and store field objects
     this.playerField = this.makeField("playerfield");
-    this.computerField = this.makeField("computerfield");
+    // this.computerField = this.makeField("computerfield");
+    this.menu = this.buildMenu();
 
     this.launchShip();
 
     fields.appendChild(this.playerField.field);
-    fields.appendChild(this.computerField.field);
+    // fields.appendChild(this.computerField.field);
+    fields.appendChild(this.menu.field);
 
     limiter.appendChild(controls);
     limiter.appendChild(fields);
@@ -148,6 +150,14 @@ const sinkship = {
     controls.appendChild(startButton);
 
     return controls;
+  },
+
+  buildMenu: function () {
+    const field = this.makeDiv();
+    field.id = "menu";
+    field.classList.add("field");
+
+    return { field };
   },
 
   launchShip: function () {
