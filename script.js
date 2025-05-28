@@ -5,6 +5,9 @@ window.addEventListener("load", function () {
 
 // Define the sinkship object
 const sinkship = {
+  playerField: [],
+  computerField: [],
+
   init: function () {
     alert("It works");
 
@@ -45,19 +48,20 @@ const sinkship = {
     main.appendChild(limiter);
 
     // Create control panel
-    const controls = this.makeDiv();
-    controls.classList.add("controls");
+    const controls = this.makeControls();
 
     // Create fields container
     const fields = this.makeDiv();
     fields.classList.add("fields");
 
-    // Create fields
-    const playerField = this.makeField("playerfield");
-    const computerField = this.makeField("computerfield");
+    /// Create and store field objects
+    this.playerField = this.makeField("playerfield");
+    this.computerField = this.makeField("computerfield");
 
-    fields.appendChild(playerField);
-    fields.appendChild(computerField);
+    this.launchShip();
+
+    fields.appendChild(this.playerField.field);
+    fields.appendChild(this.computerField.field);
 
     limiter.appendChild(controls);
     limiter.appendChild(fields);
@@ -105,18 +109,53 @@ const sinkship = {
     field.classList.add("field");
     field.id = id;
 
-    // Create 10×10 grid (y: rows, x: columns)
-    for (let y = 0; y < 10; y++) {
-      for (let x = 0; x < 10; x++) {
+    const cells = []; // Array to hold cell elements
+
+    // Create 10×10 grid (x: rows, y: columns)
+    for (let x = 0; x < 10; x++) {
+      const row = [];
+      for (let y = 0; y < 10; y++) {
         const cell = document.createElement("div");
         cell.classList.add("cell");
 
-
+        // Store coordinates
+        cell.dataset.x = x;
+        cell.dataset.y = y;
 
         field.appendChild(cell);
+        row.push(cell); // Add cell to the row
       }
+      cells.push(row); // Add row to grid
     }
 
-    return field;
+    return { field, cells };
+  },
+
+  makeControls: function () {
+    const controls = this.makeDiv();
+    controls.classList.add("controls");
+
+    // Create and append the "Start Game" button
+    const buildButton = document.createElement("button");
+    buildButton.textContent = "Build Ships";
+    buildButton.classList.add("button");
+
+    const startButton = document.createElement("button");
+    startButton.textContent = "Start Game";
+    startButton.classList.add("button");
+
+    controls.appendChild(buildButton);
+    controls.appendChild(startButton);
+
+    return controls;
+  },
+
+  launchShip: function () {
+    // Hardcoded ship in playerField at row 2, columns 4-6
+    const cells = this.playerField.cells;
+
+    cells[2][4].classList.add("left");
+    cells[2][5].classList.add("horizontal");
+    cells[2][6].classList.add("right");
   },
 };
