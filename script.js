@@ -7,6 +7,7 @@ window.addEventListener("load", function () {
 const sinkship = {
   playerField: [],
   computerField: [],
+  shipInventory: {},
 
   init: function () {
     alert("It works");
@@ -57,9 +58,22 @@ const sinkship = {
     /// Create and store field objects
     this.playerField = this.makeField("playerfield");
     // this.computerField = this.makeField("computerfield");
+
     this.menu = this.buildMenu();
 
-    this.launchShip();
+    //this.launchShip();
+
+    this.playerField.cells.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        cell.addEventListener("mouseover", () =>
+          this.previewShip(rowIndex, colIndex)
+        );
+        cell.addEventListener("mouseout", () => this.clearPreview());
+        cell.addEventListener("click", () =>
+          this.placeShip(rowIndex, colIndex)
+        );
+      });
+    });
 
     fields.appendChild(this.playerField.field);
     // fields.appendChild(this.computerField.field);
@@ -114,9 +128,9 @@ const sinkship = {
     const cells = []; // Array to hold cell elements
 
     // Create 10×10 grid (x: rows, y: columns)
-    for (let x = 0; x < 10; x++) {
+    for (let y = 0; y < 10; y++) {
       const row = [];
-      for (let y = 0; y < 10; y++) {
+      for (let x = 0; x < 10; x++) {
         const cell = document.createElement("div");
         cell.classList.add("cell");
 
@@ -155,9 +169,181 @@ const sinkship = {
   buildMenu: function () {
     const field = this.makeDiv();
     field.id = "menu";
+
     field.classList.add("field");
 
+    const table = document.createElement("table");
+
+    // Table header
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    ["Count", "", "", "Type", "Size"].forEach((text) => {
+      const th = document.createElement("th");
+      th.textContent = text;
+      headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Table body
+    const tbody = document.createElement("tbody");
+
+    const ships = [
+      { count: 2, type: "Corvette", size: 2 },
+      { count: 1, type: "Battleship", size: 3 },
+      { count: 1, type: "Destroyer", size: 4 },
+      { count: 1, type: "Submarine", size: 5 },
+    ];
+
+    ships.forEach((ship) => {
+      const row = document.createElement("tr");
+
+      // Count
+      const countCell = document.createElement("td");
+      countCell.textContent = ship.count;
+      row.appendChild(countCell);
+
+      // Store initial inventory count
+      this.shipInventory[ship.type] = {
+        count: ship.count,
+        countCell: countCell,
+      };
+
+      // Horizontal ship option
+      const hCell = document.createElement("td");
+      const hOption = document.createElement("div");
+      hOption.classList.add("ship-option");
+      hCell.appendChild(hOption);
+      row.appendChild(hCell);
+
+      // Vertical ship option
+      const vCell = document.createElement("td");
+      const vOption = document.createElement("div");
+      vOption.classList.add("ship-option", "v");
+      vCell.appendChild(vOption);
+      row.appendChild(vCell);
+
+      // Type
+      const typeCell = document.createElement("td");
+      typeCell.textContent = ship.type;
+      row.appendChild(typeCell);
+
+      // Size
+      const sizeCell = document.createElement("td");
+      sizeCell.textContent = ship.size;
+      row.appendChild(sizeCell);
+
+      tbody.appendChild(row);
+
+      // Add click event to ship options
+      hCell.addEventListener("click", () => {
+        sinkship.selectedShip = {
+          type: ship.type,
+          size: ship.size,
+          orientation: "horizontal",
+        };
+        console.log("Selected:", sinkship.selectedShip);
+      });
+
+      vCell.addEventListener("click", () => {
+        sinkship.selectedShip = {
+          type: ship.type,
+          size: ship.size,
+          orientation: "vertical",
+        };
+        console.log("Selected:", sinkship.selectedShip);
+      });
+    });
+
+    table.appendChild(tbody);
+    field.appendChild(table);
+
     return { field };
+  },
+
+  previewShip: function (startRow, StartCol) {
+    const ship = this.selectedShip;
+    if (!ship) return;
+
+    const cells = this.playerField.cells;
+    const length = ship.size;
+
+    // Determine the ship's end position
+    let fits =
+      ship.orientation === "horizontal"
+        ? StartCol + length <= 10
+        : startRow + length <= 10;
+
+    if (!fits) return; // Abort preview if ship won't fit
+
+    for (let i = 0; i < length; i++) {
+      let x = StartCol;
+      let y = startRow;
+
+      if (ship.orientation === "horizontal") {
+        x += i;
+      } else {
+        y += i;
+      }
+
+      cells[y][x].classList.add("preview");
+    }
+  },
+
+  clearPreview: function () {
+    this.playerField.cells.flat().forEach((cell) => {
+      cell.classList.remove("preview");
+    });
+  },
+
+  placeShip: function (startRow, startCol) {
+    const ship = this.selectedShip;
+    if (!ship) return;
+
+    const inventory = this.shipInventory[ship.type];
+    if (!inventory || inventory.count <= 0) {
+      alert(`No more ${ship.type}s available.`);
+      return;
+    }
+
+    const cells = this.playerField.cells;
+    const length = ship.size;
+    const type = ship.type.toLowerCase();
+
+    // Check bounds
+    const fits =
+      ship.orientation === "horizontal"
+        ? startCol + length <= 10
+        : startRow + length <= 10;
+
+    if (!fits) return;
+
+    for (let i = 0; i < length; i++) {
+      let x = startCol;
+      let y = startRow;
+
+      if (ship.orientation === "horizontal") x += i;
+      else y += i;
+
+      const cell = cells[y][x];
+      cell.classList.remove("preview");
+
+      const className =
+        ship.orientation === "horizontal" ? `${type}-${i}` : `${type}-v-${i}`;
+
+      cell.classList.add(className);
+    }
+
+    // Decrease ship count in inventory
+    inventory.count--;
+    inventory.countCell.textContent = inventory.count;
+
+    // Reset selected ship if none left
+    if (inventory.count === 0) {
+      this.selectedShip = null;
+    }
   },
 
   launchShip: function () {
