@@ -51,27 +51,29 @@ footer {
 
 .controls {
     width: 80%;
-    height: 5%;
+    max-width: 1000px;
     margin: 1em auto;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    gap: 1em;
 }
 
 .button {
+    flex: 0 0 auto;
+    width: 220px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    color: rgb(0, 0, 0);
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
     margin: 0.5em;
-    width: 30%;
-    margin-left: 2em;
-    margin-right: 2em;
-    color: rgb(0, 0, 0);
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    white-space: nowrap;
+    text-align: center;
 }
 
 .button:hover {
@@ -110,6 +112,7 @@ footer {
 
 #menu {
     display: flex;
+    flex-direction: column;
     align-items: center;
     color: black;
     justify-content: center;
@@ -128,41 +131,41 @@ footer {
     background-color: #52b0eea6;
 }
 
-.corvette-0 { background-color: #52b0eea6; background-position: 0 -100%; }
-.corvette-1 { background-color: #52b0eea6; background-position: -100% -100%; }
+.ship-corvette-0 { background-color: #52b0eea6; background-position: 0 -100%; }
+.ship-corvette-1 { background-color: #52b0eea6; background-position: -100% -100%; }
 
-.corvette-v-0 { background-color: #52b0eea6; background-position: -200% 0; }
-.corvette-v-1 { background-color: #52b0eea6; background-position: -200% -100%; }
+.ship-corvette-v-0 { background-color: #52b0eea6; background-position: -200% 0; }
+.ship-corvette-v-1 { background-color: #52b0eea6; background-position: -200% -100%; }
 
-.battleship-0 { background-color: #52b0eea6; background-position: 0 -200%; }
-.battleship-1 { background-color: #52b0eea6; background-position: -100% -200%; }
-.battleship-2 { background-color: #52b0eea6; background-position: -200% -200%; }
+.ship-battleship-0 { background-color: #52b0eea6; background-position: 0 -200%; }
+.ship-battleship-1 { background-color: #52b0eea6; background-position: -100% -200%; }
+.ship-battleship-2 { background-color: #52b0eea6; background-position: -200% -200%; }
 
-.battleship-v-0 { background-color: #52b0eea6; background-position: -300% 0; }
-.battleship-v-1 { background-color: #52b0eea6; background-position: -300% -100%; }
-.battleship-v-2 { background-color: #52b0eea6; background-position: -300% -200%; }
+.ship-battleship-v-0 { background-color: #52b0eea6; background-position: -300% 0; }
+.ship-battleship-v-1 { background-color: #52b0eea6; background-position: -300% -100%; }
+.ship-battleship-v-2 { background-color: #52b0eea6; background-position: -300% -200%; }
 
-.destroyer-0 { background-color: #52b0eea6; background-position: 0 -300%; }
-.destroyer-1 { background-color: #52b0eea6; background-position: -100% -300%; }
-.destroyer-2 { background-color: #52b0eea6; background-position: -200% -300%; }
-.destroyer-3 { background-color: #52b0eea6; background-position: -300% -300%; }
+.ship-destroyer-0 { background-color: #52b0eea6; background-position: 0 -300%; }
+.ship-destroyer-1 { background-color: #52b0eea6; background-position: -100% -300%; }
+.ship-destroyer-2 { background-color: #52b0eea6; background-position: -200% -300%; }
+.ship-destroyer-3 { background-color: #52b0eea6; background-position: -300% -300%; }
 
-.destroyer-v-0 { background-color: #52b0eea6; background-position: -400% 0; }
-.destroyer-v-1 { background-color: #52b0eea6; background-position: -400% -100%; }
-.destroyer-v-2 { background-color: #52b0eea6; background-position: -400% -200%; }
-.destroyer-v-3 { background-color: #52b0eea6; background-position: -400% -300%; }
+.ship-destroyer-v-0 { background-color: #52b0eea6; background-position: -400% 0; }
+.ship-destroyer-v-1 { background-color: #52b0eea6; background-position: -400% -100%; }
+.ship-destroyer-v-2 { background-color: #52b0eea6; background-position: -400% -200%; }
+.ship-destroyer-v-3 { background-color: #52b0eea6; background-position: -400% -300%; }
 
-.submarine-0 { background-color: #52b0eea6; background-position: 0 -400%; }
-.submarine-1 { background-color: #52b0eea6; background-position: -100% -400%; }
-.submarine-2 { background-color: #52b0eea6; background-position: -200% -400%; }
-.submarine-3 { background-color: #52b0eea6; background-position: -300% -400%; }
-.submarine-4 { background-color: #52b0eea6; background-position: -400% -400%; }
+.ship-submarine-0 { background-color: #52b0eea6; background-position: 0 -400%; }
+.ship-submarine-1 { background-color: #52b0eea6; background-position: -100% -400%; }
+.ship-submarine-2 { background-color: #52b0eea6; background-position: -200% -400%; }
+.ship-submarine-3 { background-color: #52b0eea6; background-position: -300% -400%; }
+.ship-submarine-4 { background-color: #52b0eea6; background-position: -400% -400%; }
 
-.submarine-v-0 { background-color: #52b0eea6; background-position: -500% 0; }
-.submarine-v-1 { background-color: #52b0eea6; background-position: -500% -100%; }
-.submarine-v-2 { background-color: #52b0eea6; background-position: -500% -200%; }
-.submarine-v-3 { background-color: #52b0eea6; background-position: -500% -300%; }
-.submarine-v-4 { background-color: #52b0eea6; background-position: -500% -400%; }
+.ship-submarine-v-0 { background-color: #52b0eea6; background-position: -500% 0; }
+.ship-submarine-v-1 { background-color: #52b0eea6; background-position: -500% -100%; }
+.ship-submarine-v-2 { background-color: #52b0eea6; background-position: -500% -200%; }
+.ship-submarine-v-3 { background-color: #52b0eea6; background-position: -500% -300%; }
+.ship-submarine-v-4 { background-color: #52b0eea6; background-position: -500% -400%; }
 
 .ship-option {
     display: inline-block;
@@ -215,3 +218,37 @@ tbody td:nth-child(3):active {
     background-color: #17a2ff;
     outline: 2px dashed #ffffff;
   }
+
+.blocked {
+    background-color: #ba010179;
+}
+  
+.remove-button {
+    margin: 1em auto 0 auto;
+    width: 300px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: black;
+    background: #cdefff;
+    border: 2px solid #cdefff;
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+  
+.remove-button:hover {
+    background: #5a90c8;
+    transform: scale(0.97);
+}
+  
+.remove-button.active {
+    background: #5a90c8;
+    transform: scale(0.97);
+}
+
+.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}

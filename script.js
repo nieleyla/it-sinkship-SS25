@@ -8,6 +8,7 @@ const sinkship = {
   playerField: [],
   computerField: [],
   shipInventory: {},
+  removalMode: false,
 
   init: function () {
     alert("It works");
@@ -69,9 +70,13 @@ const sinkship = {
           this.previewShip(rowIndex, colIndex)
         );
         cell.addEventListener("mouseout", () => this.clearPreview());
-        cell.addEventListener("click", () =>
-          this.placeShip(rowIndex, colIndex)
-        );
+        cell.addEventListener("click", () => {
+          if (this.removalMode) {
+            this.removeShip(rowIndex, colIndex);
+          } else {
+            this.placeShip(rowIndex, colIndex);
+          }
+        });
       });
     });
 
@@ -156,11 +161,25 @@ const sinkship = {
     buildButton.textContent = "Build Ships";
     buildButton.classList.add("button");
 
+    // Create Auto Place button
+    const autoPlaceButton = document.createElement("button");
+    autoPlaceButton.textContent = "Auto Place Ships";
+    autoPlaceButton.classList.add("button");
+
     const startButton = document.createElement("button");
     startButton.textContent = "Start Game";
     startButton.classList.add("button");
+    startButton.disabled = true; // Initially disabled
+    startButton.classList.add("disabled");
+
+    this.startButton = startButton;
+
+    autoPlaceButton.addEventListener("click", () => {
+      this.autoPlaceShips();
+    });
 
     controls.appendChild(buildButton);
+    controls.appendChild(autoPlaceButton);
     controls.appendChild(startButton);
 
     return controls;
@@ -197,6 +216,19 @@ const sinkship = {
       { count: 1, type: "Submarine", size: 5 },
     ];
 
+    // Add remove button
+    const removeButton = document.createElement("button");
+    removeButton.textContent = "Remove Ships";
+    removeButton.classList.add("button", "remove-button");
+
+    removeButton.addEventListener("click", () => {
+      this.selectedShip = null;
+      this.removalMode = !this.removalMode;
+
+      removeButton.classList.toggle("active", this.removalMode); // toggle visual style
+      console.log("Removal mode:", this.removalMode);
+    });
+
     ships.forEach((ship) => {
       const row = document.createElement("tr");
 
@@ -208,7 +240,9 @@ const sinkship = {
       // Store initial inventory count
       this.shipInventory[ship.type] = {
         count: ship.count,
+        originalCount: ship.count,
         countCell: countCell,
+        size: ship.size,
       };
 
       // Horizontal ship option
@@ -259,34 +293,60 @@ const sinkship = {
 
     table.appendChild(tbody);
     field.appendChild(table);
+    field.appendChild(removeButton);
 
     return { field };
   },
 
-  previewShip: function (startRow, StartCol) {
+  previewShip: function (startRow, startCol) {
     const ship = this.selectedShip;
     if (!ship) return;
 
     const cells = this.playerField.cells;
     const length = ship.size;
 
-    // Determine the ship's end position
-    let fits =
+    // First: check bounds
+    const fits =
       ship.orientation === "horizontal"
-        ? StartCol + length <= 10
+        ? startCol + length <= 10
         : startRow + length <= 10;
 
-    if (!fits) return; // Abort preview if ship won't fit
+    // If it doesn't fit, gray out the potential cells and return
+    if (!fits) {
+      for (let i = 0; i < length; i++) {
+        let x = startCol;
+        let y = startRow;
+        if (ship.orientation === "horizontal") x += i;
+        else y += i;
 
-    for (let i = 0; i < length; i++) {
-      let x = StartCol;
-      let y = startRow;
-
-      if (ship.orientation === "horizontal") {
-        x += i;
-      } else {
-        y += i;
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+          cells[y][x].classList.add("blocked");
+        }
       }
+      return; // skip further checks
+    }
+
+    // Second: check if placement area is too close to another ship
+    if (!this.canPlaceShip(startRow, startCol, ship.orientation, length)) {
+      for (let i = 0; i < length; i++) {
+        let x = startCol;
+        let y = startRow;
+        if (ship.orientation === "horizontal") x += i;
+        else y += i;
+
+        if (x >= 0 && x < 10 && y >= 0 && y < 10) {
+          cells[y][x].classList.add("blocked");
+        }
+      }
+      return;
+    }
+
+    // Valid preview
+    for (let i = 0; i < length; i++) {
+      let x = startCol;
+      let y = startRow;
+      if (ship.orientation === "horizontal") x += i;
+      else y += i;
 
       cells[y][x].classList.add("preview");
     }
@@ -294,7 +354,7 @@ const sinkship = {
 
   clearPreview: function () {
     this.playerField.cells.flat().forEach((cell) => {
-      cell.classList.remove("preview");
+      cell.classList.remove("preview", "blocked");
     });
   },
 
@@ -312,13 +372,10 @@ const sinkship = {
     const length = ship.size;
     const type = ship.type.toLowerCase();
 
-    // Check bounds
-    const fits =
-      ship.orientation === "horizontal"
-        ? startCol + length <= 10
-        : startRow + length <= 10;
-
-    if (!fits) return;
+    if (!this.canPlaceShip(startRow, startCol, ship.orientation, length)) {
+      alert("Invalid placement!");
+      return;
+    }
 
     for (let i = 0; i < length; i++) {
       let x = startCol;
@@ -331,19 +388,219 @@ const sinkship = {
       cell.classList.remove("preview");
 
       const className =
-        ship.orientation === "horizontal" ? `${type}-${i}` : `${type}-v-${i}`;
+        ship.orientation === "horizontal"
+          ? `ship-${type}-${i}`
+          : `ship-${type}-v-${i}`;
 
       cell.classList.add(className);
+      cell.classList.add("occupied"); // ✅ mark cell as occupied
     }
 
-    // Decrease ship count in inventory
     inventory.count--;
     inventory.countCell.textContent = inventory.count;
+    this.checkIfAllShipsPlaced();
 
-    // Reset selected ship if none left
     if (inventory.count === 0) {
       this.selectedShip = null;
     }
+  },
+
+  canPlaceShip: function (startRow, startCol, orientation, length) {
+    const cells = this.playerField.cells;
+
+    for (let i = 0; i < length; i++) {
+      let x = startCol;
+      let y = startRow;
+
+      if (orientation === "horizontal") x += i;
+      else y += i;
+
+      if (x < 0 || x >= 10 || y < 0 || y >= 10) {
+        return false; // Out of bounds
+      }
+
+      // Check this cell and side-neighbors only
+      const neighbors = [
+        [y, x], // current
+        [y - 1, x], // north
+        [y + 1, x], // south
+        [y, x - 1], // west
+        [y, x + 1], // east
+      ];
+
+      for (const [ny, nx] of neighbors) {
+        if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
+          if (cells[ny][nx].classList.contains("occupied")) {
+            return false;
+          }
+        }
+      }
+    }
+
+    return true;
+  },
+
+  removeShip: function (row, col) {
+    const cell = this.playerField.cells[row][col];
+    const classes = Array.from(cell.classList);
+    const shipClass = classes.find((c) => c.startsWith("ship-"));
+    if (!shipClass) return;
+
+    const match = shipClass.match(/^ship-(\w+)(-v)?-(\d+)/);
+    if (!match) return;
+
+    const type = match[1];
+    const orientation = match[2] === "-v" ? "vertical" : "horizontal";
+
+    const cells = this.playerField.cells;
+    const shipCells = [];
+
+    // Scan both directions to collect full ship
+    for (let dir = -1; dir <= 1; dir += 2) {
+      for (let i = 1; i < 10; i++) {
+        let x = col;
+        let y = row;
+
+        if (orientation === "horizontal") x += i * dir;
+        else y += i * dir;
+
+        if (x < 0 || x >= 10 || y < 0 || y >= 10) break;
+
+        const c = cells[y][x];
+        if (!c.classList.contains("occupied")) break;
+
+        const classMatch = Array.from(c.classList).find((cls) =>
+          cls.startsWith(`ship-${type}`)
+        );
+        if (!classMatch) break;
+
+        shipCells.push(c);
+      }
+    }
+
+    // Add the original cell
+    shipCells.push(cell);
+
+    // Sort for consistent cleanup
+    shipCells.sort((a, b) => {
+      const ax = parseInt(a.dataset.x),
+        ay = parseInt(a.dataset.y);
+      const bx = parseInt(b.dataset.x),
+        by = parseInt(b.dataset.y);
+      return ay === by ? ax - bx : ay - by;
+    });
+
+    // First, remove all water classes from the whole grid (they’ll be re-added later)
+    this.playerField.cells.flat().forEach((cell) => {
+      cell.classList.remove("water");
+    });
+
+    // Then, collect all parts of the ship
+    shipCells.forEach((c) => {
+      c.className = "cell"; // resets all classes to default
+    });
+
+    // Update inventory
+    const inventory =
+      this.shipInventory[type.charAt(0).toUpperCase() + type.slice(1)];
+    if (inventory) {
+      inventory.count++;
+      inventory.countCell.textContent = inventory.count;
+      this.checkIfAllShipsPlaced();
+    }
+  },
+
+  // Check if inventory is empty and enable start button
+  checkIfAllShipsPlaced: function () {
+    const allPlaced = Object.values(this.shipInventory).every(
+      (entry) => entry.count === 0
+    );
+
+    this.startButton.disabled = !allPlaced;
+    this.startButton.classList.toggle("disabled", !allPlaced);
+
+    if (allPlaced) {
+      // Add event listener once
+      if (!this.startButton.dataset.listenerAdded) {
+        this.startButton.addEventListener("click", () => {
+          this.startGame();
+        });
+        this.startButton.dataset.listenerAdded = "true";
+      }
+
+      // ✅ Mark all unoccupied cells as water
+      this.playerField.cells.flat().forEach((cell) => {
+        if (!cell.classList.contains("occupied")) {
+          cell.classList.add("water");
+        }
+      });
+    }
+  },
+
+  // Start Game and swap fields
+  startGame: function () {
+    alert("Game has been started!");
+
+    // Disable the button
+    this.startButton.disabled = true;
+    this.startButton.classList.add("disabled");
+
+    // Create computer field
+    this.computerField = this.makeField("computerfield");
+
+    // Replace menu with computer field
+    const fieldsContainer = this.playerField.field.parentNode;
+    fieldsContainer.removeChild(this.menu.field);
+    fieldsContainer.appendChild(this.computerField.field);
+  },
+
+  autoPlaceShips: function () {
+    // Clear any existing ships
+    Object.keys(this.shipInventory).forEach((type) => {
+      this.shipInventory[type].count = this.shipInventory[type].originalCount;
+      this.shipInventory[type].countCell.textContent =
+        this.shipInventory[type].count;
+    });
+
+    this.playerField.cells.flat().forEach((cell) => {
+      cell.className = "cell";
+    });
+
+    const orientations = ["horizontal", "vertical"];
+    const cells = this.playerField.cells;
+
+    for (const type in this.shipInventory) {
+      const inventory = this.shipInventory[type];
+
+      while (inventory.count > 0) {
+        const size = inventory.size;
+        let placed = false;
+        let attempts = 0;
+
+        while (!placed && attempts < 100) {
+          const orientation =
+            orientations[Math.floor(Math.random() * orientations.length)];
+          const row = Math.floor(Math.random() * 10);
+          const col = Math.floor(Math.random() * 10);
+
+          if (this.canPlaceShip(row, col, orientation, size)) {
+            this.selectedShip = { type, size, orientation };
+            this.placeShip(row, col);
+            placed = true;
+          }
+
+          attempts++;
+        }
+
+        if (!placed) {
+          alert(`Could not auto-place ${type}`);
+          break;
+        }
+      }
+    }
+
+    // Check if all ships placed to enable Start Game
+    this.checkIfAllShipsPlaced();
   },
 
   launchShip: function () {
