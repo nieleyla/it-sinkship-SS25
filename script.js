@@ -57,8 +57,8 @@ const sinkship = {
     // Create a Message Area
     const messageArea = this.makeDiv();
     messageArea.classList.add("message-area");
-    messageArea.textContent = "Welcome to Sink Ship! Build your fleet and start the game.";
-
+    messageArea.textContent =
+      "Welcome to Sink Ship! Build your fleet and start the game.";
 
     // Create fields container
     const fields = this.makeDiv();
@@ -66,7 +66,6 @@ const sinkship = {
 
     /// Create and store field objects
     this.playerField = this.makeField("playerfield");
-    // this.computerField = this.makeField("computerfield");
 
     this.menu = this.buildMenu();
 
@@ -411,7 +410,7 @@ const sinkship = {
           : `ship-${type}-v-${i}`;
 
       cell.classList.add(className);
-      cell.classList.add("occupied"); // ✅ mark cell as occupied
+      cell.classList.add("occupied");
     }
 
     inventory.count--;
@@ -565,7 +564,12 @@ const sinkship = {
 
   // Start Game and swap fields
   startGame: function () {
-    alert("Game has been started!");
+    console.log("Game started!");
+
+    // Clear the message area
+    const messageArea = document.querySelector(".message-area");
+    messageArea.textContent =
+      "Game started! Click on the computer field to attack.";
 
     // Disable the control buttons
     this.buildButton.disabled = true;
@@ -579,11 +583,28 @@ const sinkship = {
     // Create computer field
     this.computerField = this.makeField("computerfield");
 
+    // Add autoplaced ships to computer field
+    this.autoPlaceComputerShips();
+
     // Add event listeners to computer field cells
     this.computerField.cells.forEach((row, y) => {
       row.forEach((cell, x) => {
         cell.addEventListener("click", () => {
-          this.handlePlayerAttack(x, y);
+          if (!cell.classList.contains("disabled")) {
+            this.handlePlayerAttack(x, y);
+            cell.classList.add("disabled");
+            cell.classList.remove("clickable");
+          }
+        });
+
+        cell.addEventListener("mouseover", () => {
+          if (!cell.classList.contains("disabled")) {
+            cell.classList.add("clickable");
+          }
+        });
+
+        cell.addEventListener("mouseout", () => {
+          cell.classList.remove("clickable");
         });
       });
     });
@@ -672,8 +693,114 @@ const sinkship = {
     }
   },
 
-  // Handle player attack on computer field
+  // Auto place ships on computer field
+  autoPlaceComputerShips: function () {
+    const orientations = ["horizontal", "vertical"];
+    const cells = this.computerField.cells;
+    const ships = [
+      { count: 2, type: "Corvette", size: 2 },
+      { count: 1, type: "Battleship", size: 3 },
+      { count: 1, type: "Destroyer", size: 4 },
+      { count: 1, type: "Submarine", size: 5 },
+    ];
+
+    const canPlace = (row, col, orientation, length) => {
+      for (let i = 0; i < length; i++) {
+        let x = col;
+        let y = row;
+
+        if (orientation === "horizontal") x += i;
+        else y += i;
+
+        if (x < 0 || x >= 10 || y < 0 || y >= 10) return false;
+
+        // Check surroundings
+        const neighbors = [
+          [y, x],
+          [y - 1, x],
+          [y + 1, x],
+          [y, x - 1],
+          [y, x + 1],
+        ];
+
+        for (const [ny, nx] of neighbors) {
+          if (
+            nx >= 0 &&
+            nx < 10 &&
+            ny >= 0 &&
+            ny < 10 &&
+            cells[ny][nx].classList.contains("occupied")
+          ) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    };
+
+    const place = (row, col, orientation, size, type) => {
+      for (let i = 0; i < size; i++) {
+        let x = col;
+        let y = row;
+        if (orientation === "horizontal") x += i;
+        else y += i;
+
+        const cell = cells[y][x];
+        cell.classList.add("occupied");
+      }
+
+      // Console log for debugging
+      console.log(`Placed ${type} at (${row}, ${col}) ${orientation}`);
+    };
+
+    for (const ship of ships) {
+      for (let i = 0; i < ship.count; i++) {
+        let placed = false;
+        let attempts = 0;
+
+        while (!placed && attempts < 100) {
+          const orientation =
+            orientations[Math.floor(Math.random() * orientations.length)];
+          const row = Math.floor(Math.random() * 10);
+          const col = Math.floor(Math.random() * 10);
+
+          if (canPlace(row, col, orientation, ship.size)) {
+            place(row, col, orientation, ship.size, ship.type);
+            placed = true;
+          }
+
+          attempts++;
+        }
+
+        if (!placed) {
+          alert(`Failed to place ${ship.type} on computer field.`);
+          return;
+        }
+      }
+    }
+  },
+
   handlePlayerAttack: function (x, y) {
-    console.log(`Player attacked at (${x}, ${y})`);
-  }
+    const cell = this.computerField.cells[y][x];
+
+    // Prevent re-clicking
+    if (cell.classList.contains("disabled")) {
+      console.log("Cell already attacked.");
+      return;
+    }
+
+    // Disable the cell after attack
+    cell.classList.add("disabled");
+    cell.classList.remove("clickable");
+
+    // Check hit or miss
+    if (cell.classList.contains("occupied")) {
+      cell.classList.add("hit");
+      console.log(`Hit at (${x}, ${y})`);
+    } else {
+      cell.classList.add("miss");
+      console.log(`Miss at (${x}, ${y})`);
+    }
+  },
 };

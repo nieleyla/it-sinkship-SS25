@@ -78,8 +78,8 @@ footer {
 }
 
 .button:hover {
-    background: rgba(255, 255, 255, 0.1); /* slightly darker */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); /* soft glow */
+    background: rgba(255, 255, 255, 0.1); 
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .button:active {
@@ -252,7 +252,6 @@ tbody td:nth-child(3):active {
 }
 
 .disabled {
-    opacity: 0.5;
     pointer-events: none;
 }
 
@@ -265,6 +264,21 @@ tbody td:nth-child(3):active {
     text-align: center;
     border-radius: 8px;
     font-size: 16px;
+}
+
+.clickable {
+    cursor: pointer;
+    background-color: #0096fa;
+}
+
+.hit {
+    background-color: #0096faa8;
+    background-position: -100% 0;
+}
+  
+.miss {
+    background-color: #0096faa8;
+    background-position: 0 0;
 }
 
 @media (max-width: 900px) {
@@ -342,6 +356,8 @@ tbody td:nth-child(3):active {
       font-size: clamp(13px, 3vw, 15px);
     }
 }
+
+
 
   
   
