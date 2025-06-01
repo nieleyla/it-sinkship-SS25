@@ -253,6 +253,7 @@ tbody td:nth-child(3):active {
 
 .disabled {
     pointer-events: none;
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .message-area {
@@ -268,16 +269,16 @@ tbody td:nth-child(3):active {
 
 .clickable {
     cursor: pointer;
-    background-color: #0096fa;
+    background-color: #072894;
 }
 
 .hit {
-    background-color: #0096faa8;
+    background-color: #072894;
     background-position: -100% 0;
 }
   
 .miss {
-    background-color: #0096faa8;
+    background-color: #072894;
     background-position: 0 0;
 }
 
@@ -356,6 +357,55 @@ tbody td:nth-child(3):active {
       font-size: clamp(13px, 3vw, 15px);
     }
 }
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.509);
+    display: flex;
+    backdrop-filter: blur(2px);
+    justify-content: center;
+    align-items: center;
+}
+  
+.popup {
+    background: rgba(102, 178, 216, 0.395);
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 2em;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    color: #ffffff;
+}
+  
+.popup h2 {
+    margin-bottom: 1em;
+    font-size: 1.8em;
+    color: #ffffff;
+}
+  
+.restart-button {
+    background: rgba(0, 41, 111, 0.35);
+    color: #ffffff;
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.8em 1.5em;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+  
+.restart-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.03);
+}
+  
 
 
 

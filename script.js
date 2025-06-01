@@ -9,8 +9,9 @@ const sinkship = {
   computerField: [],
   shipInventory: {},
   removalMode: false,
-
   isMobile: "ontouchstart" in window || navigator.maxTouchPoints > 0,
+  playerTurn: true,
+  shipIdCounter: 0,
 
   init: function () {
     alert("It works");
@@ -409,6 +410,9 @@ const sinkship = {
           ? `ship-${type}-${i}`
           : `ship-${type}-v-${i}`;
 
+      const shipId = `ship-${this.shipIdCounter++}`;
+      cell.dataset.shipId = shipId;
+
       cell.classList.add(className);
       cell.classList.add("occupied");
     }
@@ -740,6 +744,7 @@ const sinkship = {
     };
 
     const place = (row, col, orientation, size, type) => {
+      const shipId = `computer-ship-${this.shipIdCounter++}`; // Generate ship ID
       for (let i = 0; i < size; i++) {
         let x = col;
         let y = row;
@@ -748,6 +753,7 @@ const sinkship = {
 
         const cell = cells[y][x];
         cell.classList.add("occupied");
+        cell.dataset.shipId = shipId;
       }
 
       // Console log for debugging
@@ -782,25 +788,235 @@ const sinkship = {
   },
 
   handlePlayerAttack: function (x, y) {
+    if (!this.playerTurn) return;
+
     const cell = this.computerField.cells[y][x];
+    const messageArea = document.querySelector(".message-area");
 
-    // Prevent re-clicking
-    if (cell.classList.contains("disabled")) {
-      console.log("Cell already attacked.");
-      return;
-    }
-
-    // Disable the cell after attack
     cell.classList.add("disabled");
-    cell.classList.remove("clickable");
 
-    // Check hit or miss
     if (cell.classList.contains("occupied")) {
       cell.classList.add("hit");
-      console.log(`Hit at (${x}, ${y})`);
+      const shipId = cell.dataset.shipId;
+
+      if (this.isShipSunk(shipId, this.computerField.cells)) {
+        this.updateMessage("Hit and sunk ship! You can shoot again.");
+      } else {
+        this.updateMessage("Hit! You can shoot again.");
+      }
+      if (this.checkGameOver()) return;
     } else {
       cell.classList.add("miss");
-      console.log(`Miss at (${x}, ${y})`);
+      this.updateMessage("Miss! Now it's computer's turn.");
+      this.playerTurn = false;
+    }
+    // Check if game is over
+    if (this.checkGameOver()) return;
+
+    // Proceed to computer's turn
+    setTimeout(() => {
+      this.computerTurn();
+    }, 1000); // Delay to show hit/miss effect
+  },
+
+  computerTurn: function () {
+    if (this.playerTurn) return; // Only proceed if it's computer's turn
+
+    const available = this.getAvailablePlayerCells();
+    if (available.length === 0) return;
+
+    let cell;
+    const cells = this.playerField.cells;
+    const state = this.aiState;
+
+    if (state.mode === "target" && state.targets.length > 0) {
+      // Try next target from queue
+      const { x, y } = state.targets.shift();
+      cell = cells[y][x];
+      if (cell.classList.contains("disabled")) {
+        // Try next target
+        setTimeout(() => this.computerTurn(), 300);
+        return;
+      }
+    } else {
+      // Hunt mode: pick random cell
+      const { x, y } = available[Math.floor(Math.random() * available.length)];
+      cell = cells[y][x];
+    }
+
+    cell.classList.add("disabled");
+
+    if (cell.classList.contains("occupied")) {
+      cell.classList.add("hit");
+      const shipId = cell.dataset.shipId;
+      if (this.isShipSunk(shipId, this.playerField.cells)) {
+        this.updateMessage("Computer hit and sunk your ship!");
+      
+        if (this.checkGameOver()) return;
+
+      } else {
+        this.updateMessage("Computer hit your ship!");
+
+        if (this.checkGameOver()) return;
+      }
+
+      // Remain in target mode and queue new directions
+      const x = +cell.dataset.x;
+      const y = +cell.dataset.y;
+      state.mode = "target";
+      state.lastHit = { x, y };
+      state.targets.push(...this.getAdjacentCells(x, y, cells));
+
+      setTimeout(() => this.computerTurn(), 600); // Continue after hit
+    } else {
+      cell.classList.add("miss");
+      this.updateMessage("Computer missed. It's your turn.");
+      this.playerTurn = true; // Hand control back to player
+      state.mode = "hunt";
+      state.targets = [];
+      state.lastHit = null;
     }
   },
+
+  aiState: {
+    mode: "hunt",
+    targets: [],
+    lastHit: null,
+    direction: null,
+  },
+
+  getAvailablePlayerCells: function () {
+    return this.playerField.cells
+      .flat()
+      .filter((cell) => !cell.classList.contains("disabled"))
+      .map((cell) => ({
+        x: +cell.dataset.x,
+        y: +cell.dataset.y,
+      }));
+  },
+
+  getAdjacentCells: function (x, y, cells) {
+    const directions = [
+      { x: 0, y: -1 }, // N
+      { x: 1, y: 0 }, // E
+      { x: 0, y: 1 }, // S
+      { x: -1, y: 0 }, // W
+    ];
+
+    const targets = [];
+
+    directions.forEach((dir) => {
+      const newX = x + dir.x;
+      const newY = y + dir.y;
+
+      if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10) {
+        const cell = cells[newY][newX];
+        if (!cell.classList.contains("disabled")) {
+          targets.push({ x: newX, y: newY });
+        }
+      }
+    });
+
+    return targets;
+  },
+
+  // Update message area
+  updateMessage: function (message) {
+    const messageArea = document.querySelector(".message-area");
+    messageArea.textContent = message;
+  },
+
+  isShipSunk: function (shipId, cells) {
+    for (const row of cells) {
+      for (const cell of row) {
+        if (cell.dataset.shipId === shipId && !cell.classList.contains("hit")) {
+          return false; // There's still a part not hit
+        }
+      }
+    }
+    return true; // All parts are hit
+  },
+
+  checkGameOver: function () {
+    const playerShips = this.getRemainingShips(this.playerField.cells);
+    const computerShips = this.getRemainingShips(this.computerField.cells);
+  
+    if (computerShips === 0) {
+      this.endGame("🎉 You win! All enemy ships have been sunk.");
+      return true;
+    }
+  
+    if (playerShips === 0) {
+      this.endGame("💥 You lost! All your ships have been sunk.");
+      return true;
+    }
+  
+    return false;
+  },  
+
+  getRemainingShips: function (cells) {
+    const remainingShips = new Set();
+    for (const row of cells) {
+      for (const cell of row) {
+        if (
+          cell.classList.contains("occupied") &&
+          !cell.classList.contains("hit")
+        ) {
+          remainingShips.add(cell.dataset.shipId);
+        }
+      }
+    }
+    return remainingShips.size;
+  },
+
+  endGame: function (message) {
+    this.playerTurn = false;
+  
+    // Disable interaction
+    this.computerField.cells.flat().forEach((cell) => {
+      cell.classList.add("disabled");
+      cell.classList.remove("clickable");
+    });
+  
+    // Create overlay
+    const overlay = document.createElement("div");
+    overlay.classList.add("popup-overlay");
+  
+    const popup = document.createElement("div");
+    popup.classList.add("popup");
+  
+    const resultText = document.createElement("h2");
+    resultText.textContent = message;
+  
+    const restartButton = document.createElement("button");
+    restartButton.textContent = "Restart Game";
+    restartButton.className = "button restart-button";
+  
+    restartButton.addEventListener("click", () => {
+      document.body.innerHTML = "";
+      this.resetGame();
+    });
+  
+    popup.appendChild(resultText);
+    popup.appendChild(restartButton);
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+  },  
+
+  resetGame: function () {
+    this.playerField = [];
+    this.computerField = [];
+    this.shipInventory = {};
+    this.removalMode = false;
+    this.playerTurn = true;
+    this.shipIdCounter = 0;
+    this.aiState = {
+      mode: "hunt",
+      targets: [],
+      lastHit: null,
+      direction: null,
+    };
+  
+    this.init(); // Rebuild the entire game interface
+  },  
 };
