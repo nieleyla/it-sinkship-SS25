@@ -10,6 +10,8 @@ const sinkship = {
   shipInventory: {},
   removalMode: false,
 
+  isMobile: "ontouchstart" in window || navigator.maxTouchPoints > 0,
+
   init: function () {
     alert("It works");
 
@@ -271,21 +273,27 @@ const sinkship = {
 
       // Add click event to ship options
       hCell.addEventListener("click", () => {
-        sinkship.selectedShip = {
+        this.selectedShip = {
           type: ship.type,
           size: ship.size,
           orientation: "horizontal",
         };
-        console.log("Selected:", sinkship.selectedShip);
+        if (this.isMobile) {
+          this.markInvalidCells();
+        }
+        console.log("Selected:", this.selectedShip);
       });
 
       vCell.addEventListener("click", () => {
-        sinkship.selectedShip = {
+        this.selectedShip = {
           type: ship.type,
           size: ship.size,
           orientation: "vertical",
         };
-        console.log("Selected:", sinkship.selectedShip);
+        if (this.isMobile) {
+          this.markInvalidCells();
+        }
+        console.log("Selected:", this.selectedShip);
       });
     });
 
@@ -352,7 +360,10 @@ const sinkship = {
 
   clearPreview: function () {
     this.playerField.cells.flat().forEach((cell) => {
-      cell.classList.remove("preview", "blocked");
+      cell.classList.remove("preview");
+      if (!this.isMobile) {
+        cell.classList.remove("blocked"); // only remove blocked on desktop
+      }
     });
   },
 
@@ -400,6 +411,10 @@ const sinkship = {
 
     if (inventory.count === 0) {
       this.selectedShip = null;
+    }
+
+    if (this.isMobile) {
+      this.markInvalidCells(); // update blocked cells after placing
     }
   },
 
@@ -506,6 +521,11 @@ const sinkship = {
       inventory.countCell.textContent = inventory.count;
       this.checkIfAllShipsPlaced();
     }
+
+    if (this.isMobile) {
+      this.markInvalidCells(); // update blocked cells after removal
+      console.log("Invalid cells marked after removal");
+    }
   },
 
   // Check if inventory is empty and enable start button
@@ -526,7 +546,6 @@ const sinkship = {
         this.startButton.dataset.listenerAdded = "true";
       }
 
-      // ✅ Mark all unoccupied cells as water
       this.playerField.cells.flat().forEach((cell) => {
         if (!cell.classList.contains("occupied")) {
           cell.classList.add("water");
@@ -599,5 +618,34 @@ const sinkship = {
 
     // Check if all ships placed to enable Start Game
     this.checkIfAllShipsPlaced();
+  },
+
+  markInvalidCells: function () {
+    const ship = this.selectedShip;
+    if (!ship) return;
+
+    const cells = this.playerField.cells;
+
+    // Clear previous blocked cells
+    this.playerField.cells.flat().forEach((cell) =>
+      cell.classList.remove("blocked")
+    );
+
+    for (let y = 0; y < 10; y++) {
+      for (let x = 0; x < 10; x++) {
+        const fits =
+          ship.orientation === "horizontal"
+            ? x + ship.size <= 10
+            : y + ship.size <= 10;
+
+        const canPlace =
+          fits && this.canPlaceShip(y, x, ship.orientation, ship.size);
+
+        if (!canPlace) {
+          // Only mark the starting cell as blocked
+          cells[y][x].classList.add("blocked");
+        }
+      }
+    }
   },
 };

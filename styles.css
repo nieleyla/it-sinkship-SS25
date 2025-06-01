@@ -34,8 +34,9 @@ body {
 header {
     height: 10%;
     padding: 20px;
-    color: rgb(0, 0, 0);
+    color: rgb(230, 243, 255);
     font-size: 1.5em;
+    text-align: center;
 }
 
 main {
@@ -198,6 +199,7 @@ tbody td:nth-child(2), td:nth-child(3) {
     border: 2px solid #cdefff;
     background-color: #cdefff;
     border-radius: 10px;
+    min-width: 50px;
     width: 50px;
     transition: background-color 0.2s ease;
 }
@@ -251,4 +253,28 @@ tbody td:nth-child(3):active {
 .disabled {
     opacity: 0.5;
     pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    .button {
+        width: 80%;
+        margin: 0.5em 0;
+    }
+
+    .fields {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .field {
+        width: 100%;
+        max-width: none;
+    }
+
+    .controls {
+        margin-top: 3em;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2em;
+    }
 }
