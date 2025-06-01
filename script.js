@@ -62,8 +62,6 @@ const sinkship = {
 
     this.menu = this.buildMenu();
 
-    //this.launchShip();
-
     this.playerField.cells.forEach((row, rowIndex) => {
       row.forEach((cell, colIndex) => {
         cell.addEventListener("mouseover", () =>
@@ -601,14 +599,5 @@ const sinkship = {
 
     // Check if all ships placed to enable Start Game
     this.checkIfAllShipsPlaced();
-  },
-
-  launchShip: function () {
-    // Hardcoded ship in playerField at row 2, columns 4-6
-    const cells = this.playerField.cells;
-
-    cells[2][4].classList.add("left");
-    cells[2][5].classList.add("horizontal");
-    cells[2][6].classList.add("right");
   },
 };
