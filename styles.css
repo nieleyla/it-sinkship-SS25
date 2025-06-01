@@ -51,8 +51,7 @@ footer {
 }
 
 .controls {
-    width: 80%;
-    max-width: 1000px;
+    width: 100%;
     margin: 1em auto;
     display: flex;
     justify-content: center;
@@ -62,12 +61,13 @@ footer {
 
 .button {
     flex: 0 0 auto;
-    width: 220px;
+    width: 240px;
+    height: 60px;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
-    color: rgb(0, 0, 0);
-    background: rgba(255, 255, 255, 0.2);
+    color: rgb(255, 255, 255);
+    background: rgba(0, 41, 111, 0.35);
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
@@ -118,7 +118,7 @@ footer {
     color: black;
     justify-content: center;
     padding: 1em;
-  }
+}
 
 .cell {
     border: 1px solid #004f74;
@@ -228,6 +228,7 @@ tbody td:nth-child(3):active {
 .remove-button {
     margin: 1em auto 0 auto;
     width: 300px;
+    height: 40px;
     padding: 10px 20px;
     font-size: 16px;
     color: black;
@@ -255,26 +256,92 @@ tbody td:nth-child(3):active {
     pointer-events: none;
 }
 
-@media (max-width: 600px) {
+.message-area {
+    width: 60%;
+    margin: 0.5em auto;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.701);
+    color: rgba(0, 0, 0, 0.556);
+    text-align: center;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+@media (max-width: 900px) {
+    .limiter {
+      width: 100%;
+      padding: 10px;
+      min-width: 300px;
+    }
+  
     .button {
-        width: 80%;
-        margin: 0.5em 0;
+      width: 60%;
+      height: 3em;
+      font-size: clamp(14px, 4vw, 16px);
+      margin: 0.2em;
     }
-
+  
     .fields {
-        flex-direction: column;
-        align-items: center;
+      flex-direction: column;
+      align-items: center;
     }
-
+  
     .field {
-        width: 100%;
-        max-width: none;
+      width: 100%;
+      max-width: none;
     }
-
+  
     .controls {
-        margin-top: 3em;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.2em;
+      margin-top: 3em;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.1em;
+    }
+  
+    .blocked {
+      background-color: #ba010179;
+    }
+  
+    #menu {
+      width: 100%;
+      padding: 1em;
+    }
+  
+    #menu table {
+      width: 90%;
+      font-size: clamp(12px, 2.5vw, 14px);
+      margin: 0 auto;
+      table-layout: auto; /* Changed from fixed */
+    }
+  
+    #menu th, #menu td {
+      padding: 0.2em 0.4em;
+      text-align: center;
+      white-space: nowrap; /* Keep everything on one line */
+    }
+  
+    #menu td:nth-child(2),
+    #menu td:nth-child(3) {
+      width: 40px;
+      min-width: 30px;
+    }
+  
+    .ship-option {
+      width: 20px;
+      height: 5px;
+    }
+  
+    .ship-option.v {
+      width: 5px;
+      height: 20px;
+    }
+  
+    #menu .remove-button {
+      width: 90%;
+      margin-top: 1em;
+      font-size: clamp(13px, 3vw, 15px);
     }
 }
+
+  
+  

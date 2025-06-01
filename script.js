@@ -54,6 +54,12 @@ const sinkship = {
     // Create control panel
     const controls = this.makeControls();
 
+    // Create a Message Area
+    const messageArea = this.makeDiv();
+    messageArea.classList.add("message-area");
+    messageArea.textContent = "Welcome to Sink Ship! Build your fleet and start the game.";
+
+
     // Create fields container
     const fields = this.makeDiv();
     fields.classList.add("fields");
@@ -85,6 +91,7 @@ const sinkship = {
     fields.appendChild(this.menu.field);
 
     limiter.appendChild(controls);
+    limiter.appendChild(messageArea);
     limiter.appendChild(fields);
 
     return main;
@@ -172,6 +179,8 @@ const sinkship = {
     startButton.disabled = true; // Initially disabled
     startButton.classList.add("disabled");
 
+    this.buildButton = buildButton;
+    this.autoPlaceButton = autoPlaceButton;
     this.startButton = startButton;
 
     autoPlaceButton.addEventListener("click", () => {
@@ -558,12 +567,26 @@ const sinkship = {
   startGame: function () {
     alert("Game has been started!");
 
-    // Disable the button
+    // Disable the control buttons
+    this.buildButton.disabled = true;
+    this.autoPlaceButton.disabled = true;
     this.startButton.disabled = true;
+
+    this.buildButton.classList.add("disabled");
+    this.autoPlaceButton.classList.add("disabled");
     this.startButton.classList.add("disabled");
 
     // Create computer field
     this.computerField = this.makeField("computerfield");
+
+    // Add event listeners to computer field cells
+    this.computerField.cells.forEach((row, y) => {
+      row.forEach((cell, x) => {
+        cell.addEventListener("click", () => {
+          this.handlePlayerAttack(x, y);
+        });
+      });
+    });
 
     // Replace menu with computer field
     const fieldsContainer = this.playerField.field.parentNode;
@@ -627,9 +650,9 @@ const sinkship = {
     const cells = this.playerField.cells;
 
     // Clear previous blocked cells
-    this.playerField.cells.flat().forEach((cell) =>
-      cell.classList.remove("blocked")
-    );
+    this.playerField.cells
+      .flat()
+      .forEach((cell) => cell.classList.remove("blocked"));
 
     for (let y = 0; y < 10; y++) {
       for (let x = 0; x < 10; x++) {
@@ -648,4 +671,9 @@ const sinkship = {
       }
     }
   },
+
+  // Handle player attack on computer field
+  handlePlayerAttack: function (x, y) {
+    console.log(`Player attacked at (${x}, ${y})`);
+  }
 };
