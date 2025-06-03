@@ -1,7 +1,6 @@
 * {
     margin: 0;
     box-sizing: border-box;
-    font-family: 'Arial', sans-serif;
 }
 
 html, body {
@@ -18,6 +17,7 @@ body {
     display: flex;
     flex-direction: column;
     background-attachment: fixed;
+    font-family: 'Arial', sans-serif;
 }
 
 .limiter {
@@ -126,88 +126,24 @@ footer {
     height: 100%;
     background-image: url('images/ships.webp');
     background-size: 600% 500%;
+    background-position: 0 0;
 }
 
 .water {
     background-color: #52b0eea6;
 }
 
-.ship-corvette-0 { background-color: #52b0eea6; background-position: 0 -100%; }
-.ship-corvette-1 { background-color: #52b0eea6; background-position: -100% -100%; }
+.ship {
+    background-image: url('images/ships.webp'), url('images/ships.webp');
+    background-size: 600% 500%, 600% 500%;
+    background-color: #52b0eea6;
+}
 
-.ship-corvette-v-0 { background-color: #52b0eea6; background-position: -200% 0; }
-.ship-corvette-v-1 { background-color: #52b0eea6; background-position: -200% -100%; }
-
-.ship-battleship-0 { background-color: #52b0eea6; background-position: 0 -200%; }
-.ship-battleship-1 { background-color: #52b0eea6; background-position: -100% -200%; }
-.ship-battleship-2 { background-color: #52b0eea6; background-position: -200% -200%; }
-
-.ship-battleship-v-0 { background-color: #52b0eea6; background-position: -300% 0; }
-.ship-battleship-v-1 { background-color: #52b0eea6; background-position: -300% -100%; }
-.ship-battleship-v-2 { background-color: #52b0eea6; background-position: -300% -200%; }
-
-.ship-destroyer-0 { background-color: #52b0eea6; background-position: 0 -300%; }
-.ship-destroyer-1 { background-color: #52b0eea6; background-position: -100% -300%; }
-.ship-destroyer-2 { background-color: #52b0eea6; background-position: -200% -300%; }
-.ship-destroyer-3 { background-color: #52b0eea6; background-position: -300% -300%; }
-
-.ship-destroyer-v-0 { background-color: #52b0eea6; background-position: -400% 0; }
-.ship-destroyer-v-1 { background-color: #52b0eea6; background-position: -400% -100%; }
-.ship-destroyer-v-2 { background-color: #52b0eea6; background-position: -400% -200%; }
-.ship-destroyer-v-3 { background-color: #52b0eea6; background-position: -400% -300%; }
-
-.ship-submarine-0 { background-color: #52b0eea6; background-position: 0 -400%; }
-.ship-submarine-1 { background-color: #52b0eea6; background-position: -100% -400%; }
-.ship-submarine-2 { background-color: #52b0eea6; background-position: -200% -400%; }
-.ship-submarine-3 { background-color: #52b0eea6; background-position: -300% -400%; }
-.ship-submarine-4 { background-color: #52b0eea6; background-position: -400% -400%; }
-
-.ship-submarine-v-0 { background-color: #52b0eea6; background-position: -500% 0; }
-.ship-submarine-v-1 { background-color: #52b0eea6; background-position: -500% -100%; }
-.ship-submarine-v-2 { background-color: #52b0eea6; background-position: -500% -200%; }
-.ship-submarine-v-3 { background-color: #52b0eea6; background-position: -500% -300%; }
-.ship-submarine-v-4 { background-color: #52b0eea6; background-position: -500% -400%; }
-
-.ship-corvette-0.sunk { background-color: #072894; background-position: 0 -100%;}
-.ship-corvette-1.sunk { background-color: #072894; background-position: -100% -100%; }
-
-.ship-corvette-v-0.sunk { background-color: #072894; background-position: -200% 0; }
-.ship-corvette-v-1.sunk { background-color: #072894; background-position: -200% -100%; }
-
-.ship-battleship-0.sunk { background-color: #072894; background-position: 0 -200%; }
-.ship-battleship-1.sunk { background-color: #072894; background-position: -100% -200%; }
-.ship-battleship-2.sunk { background-color: #072894; background-position: -200% -200%; }
-
-.ship-battleship-v-0.sunk { background-color: #072894; background-position: -300% 0; }
-.ship-battleship-v-1.sunk { background-color: #072894; background-position: -300% -100%; }
-.ship-battleship-v-2.sunk { background-color: #072894; background-position: -300% -200%; }
-
-.ship-destroyer-0.sunk { background-color: #072894; background-position: 0 -300%; }
-.ship-destroyer-1.sunk { background-color: #072894; background-position: -100% -300%; }
-.ship-destroyer-2.sunk { background-color: #072894; background-position: -200% -300%; }
-.ship-destroyer-3.sunk { background-color: #072894; background-position: -300% -300%; }
-
-.ship-destroyer-v-0.sunk { background-color: #072894; background-position: -400% 0; }
-.ship-destroyer-v-1.sunk { background-color: #072894; background-position: -400% -100%; }
-.ship-destroyer-v-2.sunk { background-color: #072894; background-position: -400% -200%; }
-.ship-destroyer-v-3.sunk { background-color: #072894; background-position: -400% -300%; }
-
-.ship-submarine-0.sunk { background-color: #072894; background-position: 0 -400%; }
-.ship-submarine-1.sunk { background-color: #072894; background-position: -100% -400%; }
-.ship-submarine-2.sunk { background-color: #072894; background-position: -200% -400%; }
-.ship-submarine-3.sunk { background-color: #072894; background-position: -300% -400%; }
-.ship-submarine-4.sunk { background-color: #072894; background-position: -400% -400%; }
-
-.ship-submarine-v-0.sunk { background-color: #072894; background-position: -500% 0; }
-.ship-submarine-v-1.sunk { background-color: #072894; background-position: -500% -100%; }
-.ship-submarine-v-2.sunk { background-color: #072894; background-position: -500% -200%; }
-.ship-submarine-v-3.sunk { background-color: #072894; background-position: -500% -300%; }
-.ship-submarine-v-4.sunk { background-color: #072894; background-position: -500% -400%; }
-
-.cell.sunk {
-    background-image: url(images/sunken_ships.svg);
-    background-size: 600% 500%;
-} 
+.sunk {
+    background-image: url('images/sunken_ships.svg'), url('images/ships.webp');
+    background-size: 600% 500%, 600% 500%;
+    background-color: #166dc3;
+}
 
 .ship-option {
     display: inline-block;
@@ -310,16 +246,18 @@ tbody td:nth-child(3):active {
 
 .clickable {
     cursor: pointer;
-    background-color: #072894;
+    background-color: #166dc3;
 }
 
 .hit {
-    background-color: #072894;
-    background-position: -100% 0;
+    background-image: url('images/ships.webp'), url('images/ships.webp');
+    background-position: -100% 0, 0 0;
+    background-size: 600% 500%, 600% 500%;
+    background-color: #166dc3;
 }
   
 .miss {
-    background-color: #072894;
+    background-color: #166dc3;
     background-position: 0 0;
 }
 
@@ -354,10 +292,6 @@ tbody td:nth-child(3):active {
       gap: 0.1em;
     }
   
-    .blocked {
-      background-color: #ba010179;
-    }
-  
     #menu {
       width: 100%;
       padding: 1em;
@@ -367,13 +301,13 @@ tbody td:nth-child(3):active {
       width: 90%;
       font-size: clamp(12px, 2.5vw, 14px);
       margin: 0 auto;
-      table-layout: auto; /* Changed from fixed */
+      table-layout: auto;
     }
   
     #menu th, #menu td {
       padding: 0.2em 0.4em;
       text-align: center;
-      white-space: nowrap; /* Keep everything on one line */
+      white-space: nowrap;
     }
   
     #menu td:nth-child(2),

@@ -1,4 +1,3 @@
-// Start program only when the DOM is fully loaded
 window.addEventListener("load", function () {
   sinkship.init();
 });
@@ -14,38 +13,33 @@ const sinkship = {
   shipIdCounter: 0,
 
   init: function () {
-    alert("It works");
+    // alert("It works");
 
-    // Append generated elements to the document body
     document.body.appendChild(this.makeHeader());
     document.body.appendChild(this.makeMain());
     document.body.appendChild(this.makeFooter());
   },
 
-  // Create and return the <header> element with a limiter container
+  // Create and return the header element
   makeHeader: function () {
     const header = document.createElement("header");
 
-    // Create limiter to hold header content
     const limiter = this.makeLimiter();
 
-    // Create headline
     const headline = document.createElement("h1");
     headline.textContent = "Sink Ship";
     limiter.appendChild(headline);
 
-    // Create copyright
     const copyright = document.createElement("p");
     copyright.innerHTML = "by Leyla Niederberger";
     limiter.appendChild(copyright);
 
-    // Add the limiter to the header
     header.appendChild(limiter);
 
     return header;
   },
 
-  // Create and return the <main> element with a limiter container
+  // Create and return the main element
   makeMain: function () {
     const main = document.createElement("main");
 
@@ -87,7 +81,6 @@ const sinkship = {
     });
 
     fields.appendChild(this.playerField.field);
-    // fields.appendChild(this.computerField.field);
     fields.appendChild(this.menu.field);
 
     limiter.appendChild(controls);
@@ -97,41 +90,37 @@ const sinkship = {
     return main;
   },
 
-  // Create and return the <footer> element
+  // Create and return the footer element
   makeFooter: function () {
     const footer = document.createElement("footer");
 
-    // Create limiter to hold footer content
     const limiter = this.makeLimiter();
 
-    // Footer line
     const footerLine = document.createElement("p");
     footerLine.innerHTML = "&copy; Leyla Niederberger 2025";
 
-    // Add the footer line to the limiter
     limiter.appendChild(footerLine);
 
-    // Append the limiter to the footer
     footer.appendChild(limiter);
 
     return footer;
   },
 
-  // Create and return a <div> element with a limiter class
+  // Create a div with the class "limiter"
   makeLimiter: function () {
     const limiter = document.createElement("div");
     limiter.className = "limiter";
     return limiter;
   },
 
-  // Create and return a <div> element with a class of "create-div"
+  // Create a generic div with a specific class
   makeDiv: function () {
     const div = document.createElement("div");
     div.classList.add("create-div");
     return div;
   },
 
-  // Create class for field
+  // Create a 10x10 grid field with cells to hold ships
   makeField: function (id) {
     const field = this.makeDiv();
     field.classList.add("field");
@@ -159,15 +148,16 @@ const sinkship = {
     return { field, cells };
   },
 
+  // Create the control panel with buttons
   makeControls: function () {
     const controls = this.makeDiv();
     controls.classList.add("controls");
 
     // Create Restart button
-    const buildButton = document.createElement("button");
-    buildButton.textContent = "Restart";
-    buildButton.classList.add("button");
-    buildButton.addEventListener("click", () => {
+    const restartButton = document.createElement("button");
+    restartButton.textContent = "Restart";
+    restartButton.classList.add("button");
+    restartButton.addEventListener("click", () => {
       this.showRestartConfirmation();
     });
 
@@ -176,13 +166,14 @@ const sinkship = {
     autoPlaceButton.textContent = "Auto Place Ships";
     autoPlaceButton.classList.add("button");
 
+    // Create Start Game button
     const startButton = document.createElement("button");
     startButton.textContent = "Start Game";
     startButton.classList.add("button");
     startButton.disabled = true; // Initially disabled
     startButton.classList.add("disabled");
 
-    this.buildButton = buildButton;
+    this.restartButton = restartButton;
     this.autoPlaceButton = autoPlaceButton;
     this.startButton = startButton;
 
@@ -190,13 +181,14 @@ const sinkship = {
       this.autoPlaceShips();
     });
 
-    controls.appendChild(buildButton);
+    controls.appendChild(restartButton);
     controls.appendChild(autoPlaceButton);
     controls.appendChild(startButton);
 
     return controls;
   },
 
+  // Create menu with ship options
   buildMenu: function () {
     const field = this.makeDiv();
     field.id = "menu";
@@ -241,6 +233,7 @@ const sinkship = {
       console.log("Removal mode:", this.removalMode);
     });
 
+    // Initialize ship inventory
     ships.forEach((ship) => {
       const row = document.createElement("tr");
 
@@ -249,7 +242,7 @@ const sinkship = {
       countCell.textContent = ship.count;
       row.appendChild(countCell);
 
-      // Store initial inventory count
+      // Store inventory count
       this.shipInventory[ship.type] = {
         count: ship.count,
         originalCount: ship.count,
@@ -291,9 +284,9 @@ const sinkship = {
           orientation: "horizontal",
         };
         if (this.isMobile) {
-          this.markInvalidCells();
+          this.markInvalidCells(); // mark invalid cells on mobile
         }
-        console.log("Selected:", this.selectedShip);
+        // console.log("Selected:", this.selectedShip);
       });
 
       vCell.addEventListener("click", () => {
@@ -303,9 +296,9 @@ const sinkship = {
           orientation: "vertical",
         };
         if (this.isMobile) {
-          this.markInvalidCells();
+          this.markInvalidCells(); // mark invalid cells on mobile
         }
-        console.log("Selected:", this.selectedShip);
+        // console.log("Selected:", this.selectedShip);
       });
     });
 
@@ -316,6 +309,7 @@ const sinkship = {
     return { field };
   },
 
+  // Preview ship placement to show potential position
   previewShip: function (startRow, startCol) {
     const ship = this.selectedShip;
     if (!ship) return;
@@ -323,13 +317,13 @@ const sinkship = {
     const cells = this.playerField.cells;
     const length = ship.size;
 
-    // First: check bounds
+    // Check bounds
     const fits =
       ship.orientation === "horizontal"
         ? startCol + length <= 10
         : startRow + length <= 10;
 
-    // If it doesn't fit, gray out the potential cells and return
+    // If it doesn't fit, show blocked cells
     if (!fits) {
       for (let i = 0; i < length; i++) {
         let x = startCol;
@@ -341,10 +335,10 @@ const sinkship = {
           cells[y][x].classList.add("blocked");
         }
       }
-      return; // skip further checks
+      return;
     }
 
-    // Second: check if placement area is too close to another ship
+    // Check if placement area is too close to another ship
     if (!this.canPlaceShip(startRow, startCol, ship.orientation, length)) {
       for (let i = 0; i < length; i++) {
         let x = startCol;
@@ -370,19 +364,22 @@ const sinkship = {
     }
   },
 
+  // Clear all preview classes from the field
   clearPreview: function () {
     this.playerField.cells.flat().forEach((cell) => {
       cell.classList.remove("preview");
       if (!this.isMobile) {
-        cell.classList.remove("blocked"); // only remove blocked on desktop
+        cell.classList.remove("blocked"); // mobile keeps blocked cells to guide touch users
       }
     });
   },
 
+  // Place the selected ship at the specified coordinates
   placeShip: function (startRow, startCol) {
     const ship = this.selectedShip;
     if (!ship) return;
 
+    // Check if ship is available in inventory
     const inventory = this.shipInventory[ship.type];
     if (!inventory || inventory.count <= 0) {
       alert(`No more ${ship.type}s available.`);
@@ -401,6 +398,7 @@ const sinkship = {
     // Generate unique ship ID
     const shipId = `ship-${this.shipIdCounter++}`;
 
+    // Place the ship on the grid
     for (let i = 0; i < length; i++) {
       let x = startCol;
       let y = startRow;
@@ -420,6 +418,7 @@ const sinkship = {
 
       cell.classList.add(className);
       cell.classList.add("occupied");
+      applyShipSprite(cell, type, ship.orientation, i, false);
     }
 
     inventory.count--;
@@ -435,6 +434,7 @@ const sinkship = {
     }
   },
 
+  // Check if a ship can be placed at the specified coordinates
   canPlaceShip: function (startRow, startCol, orientation, length) {
     const cells = this.playerField.cells;
 
@@ -449,7 +449,7 @@ const sinkship = {
         return false; // Out of bounds
       }
 
-      // Check this cell and side-neighbors only
+      // Check this cell and side-neighbors
       const neighbors = [
         [y, x], // current
         [y - 1, x], // north
@@ -461,7 +461,7 @@ const sinkship = {
       for (const [ny, nx] of neighbors) {
         if (nx >= 0 && nx < 10 && ny >= 0 && ny < 10) {
           if (cells[ny][nx].classList.contains("occupied")) {
-            return false;
+            return false; // Cell is occupied or too close to another ship
           }
         }
       }
@@ -470,12 +470,14 @@ const sinkship = {
     return true;
   },
 
+  // Remove a ship from the field
   removeShip: function (row, col) {
     const cell = this.playerField.cells[row][col];
     const classes = Array.from(cell.classList);
     const shipClass = classes.find((c) => c.startsWith("ship-"));
     if (!shipClass) return;
 
+    // Extract ship type and orientation from class
     const match = shipClass.match(/^ship-(\w+)(-v)?-(\d+)/);
     if (!match) return;
 
@@ -511,7 +513,7 @@ const sinkship = {
     // Add the original cell
     shipCells.push(cell);
 
-    // Sort for consistent cleanup
+    // Sort for cleanup
     shipCells.sort((a, b) => {
       const ax = parseInt(a.dataset.x),
         ay = parseInt(a.dataset.y);
@@ -520,15 +522,13 @@ const sinkship = {
       return ay === by ? ax - bx : ay - by;
     });
 
-    // First, remove all water classes from the whole grid (they’ll be re-added later)
+    // Remove all water classes from the whole grid
     this.playerField.cells.flat().forEach((cell) => {
       cell.classList.remove("water");
     });
 
-    // Then, collect all parts of the ship
-    shipCells.forEach((c) => {
-      c.className = "cell"; // resets all classes to default
-    });
+    // Collect all parts of the ship
+    shipCells.forEach((c) => resetShipCell(c));
 
     // Update inventory
     const inventory =
@@ -555,7 +555,6 @@ const sinkship = {
     this.startButton.classList.toggle("disabled", !allPlaced);
 
     if (allPlaced) {
-      // Add event listener once
       if (!this.startButton.dataset.listenerAdded) {
         this.startButton.addEventListener("click", () => {
           this.startGame();
@@ -593,7 +592,6 @@ const sinkship = {
     // Add autoplaced ships to computer field
     this.autoPlaceComputerShips();
 
-    // Add event listeners to computer field cells
     this.computerField.cells.forEach((row, y) => {
       row.forEach((cell, x) => {
         cell.addEventListener("click", () => {
@@ -631,7 +629,8 @@ const sinkship = {
     });
 
     this.playerField.cells.flat().forEach((cell) => {
-      cell.className = "cell";
+      resetShipCell(cell);
+      cell.classList.remove("water", "preview", "blocked", "miss"); // clear other game artifacts
     });
 
     const orientations = ["horizontal", "vertical"];
@@ -667,10 +666,10 @@ const sinkship = {
       }
     }
 
-    // Check if all ships placed to enable Start Game
     this.checkIfAllShipsPlaced();
   },
 
+  // Mark invalid cells for ship placement
   markInvalidCells: function () {
     const ship = this.selectedShip;
     if (!ship) return;
@@ -790,11 +789,11 @@ const sinkship = {
     }
   },
 
+  // Handle player attack on computer field
   handlePlayerAttack: function (x, y) {
     if (!this.playerTurn) return;
 
     const cell = this.computerField.cells[y][x];
-    const messageArea = document.querySelector(".message-area");
 
     cell.classList.add("disabled");
 
@@ -823,6 +822,7 @@ const sinkship = {
     }, 1000); // Delay to show hit/miss effect
   },
 
+  // Computer's turn logic
   computerTurn: function () {
     if (this.playerTurn) return;
 
@@ -868,7 +868,7 @@ const sinkship = {
           }
         }
       } else {
-        // No direction yet — try adjacent targets
+        // No direction yet, try adjacent targets
         while (state.targets.length) {
           const next = state.targets.shift();
           if (this.isValidAttackCell(next.x, next.y)) {
@@ -883,7 +883,7 @@ const sinkship = {
         }
       }
     } else {
-      // Hunt mode — pick random cell
+      // Hunt mode: pick random cell
       const available = this.getAvailablePlayerCells();
       if (available.length === 0) return;
       target = available[Math.floor(Math.random() * available.length)];
@@ -895,6 +895,19 @@ const sinkship = {
 
     if (cell.classList.contains("occupied")) {
       cell.classList.add("hit");
+      const classList = Array.from(cell.classList);
+      const shipClass = classList.find((c) => c.startsWith("ship-"));
+
+      if (shipClass) {
+        const match = shipClass.match(/^ship-(\w+)(-v)?-(\d+)/);
+        if (match) {
+          const type = match[1];
+          const orientation = match[2] === "-v" ? "vertical" : "horizontal";
+          const index = parseInt(match[3], 10);
+          applyShipSprite(cell, type, orientation, index, false);
+        }
+      }
+
       const shipId = cell.dataset.shipId;
       this.updateMessage("Computer hit your ship!");
 
@@ -910,6 +923,7 @@ const sinkship = {
         }
       });
 
+      // Sort targets by distance from last hit
       if (this.isShipSunk(cell.dataset.shipId, cells)) {
         this.updateMessage("Computer sunk your ship!");
         this.markSunkShip(shipId, cells);
@@ -941,6 +955,7 @@ const sinkship = {
     }
   },
 
+  // AI state management
   aiState: {
     mode: "hunt",
     lastHits: [],
@@ -967,6 +982,7 @@ const sinkship = {
     };
   },
 
+  // Check if there is enough space for a ship
   getAvailablePlayerCells: function () {
     const smallestShipSize = this.getSmallestRemainingShipSize(
       this.playerField.cells
@@ -1038,6 +1054,7 @@ const sinkship = {
     messageArea.textContent = message;
   },
 
+  // Check if a ship is sunk
   isShipSunk: function (shipId, cells) {
     let found = 0;
     let hit = 0;
@@ -1055,6 +1072,7 @@ const sinkship = {
     return found > 0 && found === hit;
   },
 
+  // Mark a sunk ship visually
   markSunkShip: function (shipId, cells) {
     let shipCells = [];
 
@@ -1086,9 +1104,17 @@ const sinkship = {
         ? `ship-${shipType}-v-${index}`
         : `ship-${shipType}-${index}`;
       cell.classList.add("hit", "disabled", "sunk", className);
+      applyShipSprite(
+        cell,
+        shipType,
+        isVertical ? "vertical" : "horizontal",
+        index,
+        true
+      );
     });
   },
 
+  // Detect if the game is over
   checkGameOver: function () {
     const playerShips = this.getRemainingShips(this.playerField.cells);
     const computerShips = this.getRemainingShips(this.computerField.cells);
@@ -1106,6 +1132,7 @@ const sinkship = {
     return false;
   },
 
+  // Get the number of remaining ships on the field
   getRemainingShips: function (cells) {
     const remainingShips = new Set();
     for (const row of cells) {
@@ -1121,6 +1148,7 @@ const sinkship = {
     return remainingShips.size;
   },
 
+  // End the game with a message and restart option
   endGame: function (message) {
     this.playerTurn = false;
 
@@ -1155,12 +1183,14 @@ const sinkship = {
     document.body.appendChild(overlay);
   },
 
+  // Restart the game
   restartGame: function () {
     // Reset key variables
     this.selectedShip = null;
     this.removalMode = false;
     this.playerTurn = true;
     this.shipIdCounter = 0;
+    this.shipInventory = {};
     this.aiState = {
       mode: "hunt",
       lastHits: [],
@@ -1177,7 +1207,7 @@ const sinkship = {
     document.body.replaceChild(newMain, main);
 
     // Reset button text
-    this.buildButton.textContent = "Restart";
+    this.restartButton.textContent = "Restart";
 
     // Reinitialize ship counts
     for (const type in this.shipInventory) {
@@ -1191,6 +1221,7 @@ const sinkship = {
     );
   },
 
+  // Double-check if the user wants to restart
   showRestartConfirmation: function () {
     // Create container
     const container = document.createElement("div");
@@ -1229,6 +1260,7 @@ const sinkship = {
     document.body.appendChild(container);
   },
 
+  // Get the smallest remaining ship size from the player's field
   getSmallestRemainingShipSize: function (cells) {
     const sizes = new Set();
 
@@ -1271,6 +1303,7 @@ const sinkship = {
     return Math.min(...uniqueSizes, 2); // fallback to 2
   },
 
+  // Check if there is enough space for a ship at the given coordinates
   checkSpace: function (x, y, size, orientation) {
     const cells = this.playerField.cells;
 
@@ -1292,7 +1325,72 @@ const sinkship = {
         return false;
       }
     }
-
     return true;
   },
 };
+
+// Function to apply ship sprite based on type, orientation, and index to avoid long styling code
+function applyShipSprite(cell, type, orientation, index, isSunk = false) {
+  const waterPos = "0 0";
+  const bgSize = "600% 500%, 600% 500%";
+
+  let shipPos = getShipSpritePosition(type, orientation, index);
+
+  // If it's a hit (but not sunk), use hit layer
+  if (cell.classList.contains("hit") && !isSunk) {
+    shipPos = "-100% 0"; // Position of the hit icon in ships.webp
+  }
+
+  const bgImage = isSunk
+    ? "url('images/sunken_ships.svg'), url('images/ships.webp')"
+    : "url('images/ships.webp'), url('images/ships.webp')";
+
+  cell.classList.add("ship");
+
+  if (isSunk) {
+    cell.classList.add("sunk", "hit");
+  }
+
+  cell.style.backgroundImage = bgImage;
+  cell.style.backgroundSize = bgSize;
+  cell.style.backgroundPosition = `${shipPos}, ${waterPos}`;
+  cell.style.backgroundColor = "";
+}
+
+function getShipSpritePosition(type, orientation, index) {
+  const yOffset = {
+    corvette: -100,
+    battleship: -200,
+    destroyer: -300,
+    submarine: -400,
+  };
+
+  const xOffset = {
+    corvette: 0,
+    battleship: 0,
+    destroyer: 0,
+    submarine: 0,
+  };
+
+  const xShift = 100 * index;
+  const yShift = yOffset[type];
+
+  if (orientation === "horizontal") {
+    return `${-xShift}% ${yShift}%`;
+  } else {
+    const xColumn = {
+      corvette: -200,
+      battleship: -300,
+      destroyer: -400,
+      submarine: -500,
+    };
+    return `${xColumn[type]}% ${-index * 100}%`;
+  }
+}
+
+function resetShipCell(cell) {
+  cell.className = "cell"; // Reset classes
+  cell.style.backgroundImage = "";
+  cell.style.backgroundSize = "";
+  cell.style.backgroundPosition = "";
+}
