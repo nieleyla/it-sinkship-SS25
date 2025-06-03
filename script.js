@@ -163,10 +163,13 @@ const sinkship = {
     const controls = this.makeDiv();
     controls.classList.add("controls");
 
-    // Create and append the "Start Game" button
+    // Create Restart button
     const buildButton = document.createElement("button");
-    buildButton.textContent = "Build Ships";
+    buildButton.textContent = "Restart";
     buildButton.classList.add("button");
+    buildButton.addEventListener("click", () => {
+      this.showRestartConfirmation();
+    });
 
     // Create Auto Place button
     const autoPlaceButton = document.createElement("button");
@@ -395,6 +398,9 @@ const sinkship = {
       return;
     }
 
+    // Generate unique ship ID
+    const shipId = `ship-${this.shipIdCounter++}`;
+
     for (let i = 0; i < length; i++) {
       let x = startCol;
       let y = startRow;
@@ -410,7 +416,6 @@ const sinkship = {
           ? `ship-${type}-${i}`
           : `ship-${type}-v-${i}`;
 
-      const shipId = `ship-${this.shipIdCounter++}`;
       cell.dataset.shipId = shipId;
 
       cell.classList.add(className);
@@ -576,11 +581,9 @@ const sinkship = {
       "Game started! Click on the computer field to attack.";
 
     // Disable the control buttons
-    this.buildButton.disabled = true;
     this.autoPlaceButton.disabled = true;
     this.startButton.disabled = true;
 
-    this.buildButton.classList.add("disabled");
     this.autoPlaceButton.classList.add("disabled");
     this.startButton.classList.add("disabled");
 
@@ -757,7 +760,7 @@ const sinkship = {
       }
 
       // Console log for debugging
-      console.log(`Placed ${type} at (${row}, ${col}) ${orientation}`);
+      // console.log(`Placed ${type} at (${row}, ${col}) ${orientation}`);
     };
 
     for (const ship of ships) {
@@ -801,6 +804,7 @@ const sinkship = {
 
       if (this.isShipSunk(shipId, this.computerField.cells)) {
         this.updateMessage("Hit and sunk ship! You can shoot again.");
+        this.markSunkShip(shipId, this.computerField.cells);
       } else {
         this.updateMessage("Hit! You can shoot again.");
       }
@@ -820,75 +824,183 @@ const sinkship = {
   },
 
   computerTurn: function () {
-    if (this.playerTurn) return; // Only proceed if it's computer's turn
+    if (this.playerTurn) return;
 
-    const available = this.getAvailablePlayerCells();
-    if (available.length === 0) return;
-
-    let cell;
     const cells = this.playerField.cells;
     const state = this.aiState;
 
-    if (state.mode === "target" && state.targets.length > 0) {
-      // Try next target from queue
-      const { x, y } = state.targets.shift();
-      cell = cells[y][x];
-      if (cell.classList.contains("disabled")) {
-        // Try next target
-        setTimeout(() => this.computerTurn(), 300);
-        return;
+    let target;
+
+    // If in target mode, follow up based on previous hit direction
+    if (state.mode === "target" && state.lastHits.length > 0) {
+      const [firstHit, ...rest] = state.lastHits;
+
+      if (!state.direction && rest.length > 0) {
+        // Determine direction from the first two hits
+        const dx = rest[0].x - firstHit.x;
+        const dy = rest[0].y - firstHit.y;
+        state.direction = { dx, dy };
+      }
+
+      if (state.direction) {
+        // Continue in same direction
+        const last = state.lastHits[state.lastHits.length - 1];
+        const x = last.x + state.direction.dx;
+        const y = last.y + state.direction.dy;
+
+        if (this.isValidAttackCell(x, y)) {
+          target = { x, y };
+        } else {
+          // Try opposite direction
+          const xOpp = firstHit.x - state.direction.dx;
+          const yOpp = firstHit.y - state.direction.dy;
+          if (this.isValidAttackCell(xOpp, yOpp)) {
+            state.lastHits = [firstHit]; // Reset to first
+            state.direction = {
+              dx: -state.direction.dx,
+              dy: -state.direction.dy,
+            };
+            target = { x: xOpp, y: yOpp };
+          } else {
+            // Reset AI
+            this.resetAI();
+            return this.computerTurn();
+          }
+        }
+      } else {
+        // No direction yet — try adjacent targets
+        while (state.targets.length) {
+          const next = state.targets.shift();
+          if (this.isValidAttackCell(next.x, next.y)) {
+            target = next;
+            break;
+          }
+        }
+
+        if (!target) {
+          this.resetAI();
+          return this.computerTurn();
+        }
       }
     } else {
-      // Hunt mode: pick random cell
-      const { x, y } = available[Math.floor(Math.random() * available.length)];
-      cell = cells[y][x];
+      // Hunt mode — pick random cell
+      const available = this.getAvailablePlayerCells();
+      if (available.length === 0) return;
+      target = available[Math.floor(Math.random() * available.length)];
     }
 
+    // Execute attack
+    const cell = cells[target.y][target.x];
     cell.classList.add("disabled");
 
     if (cell.classList.contains("occupied")) {
       cell.classList.add("hit");
       const shipId = cell.dataset.shipId;
-      if (this.isShipSunk(shipId, this.playerField.cells)) {
-        this.updateMessage("Computer hit and sunk your ship!");
-      
-        if (this.checkGameOver()) return;
+      this.updateMessage("Computer hit your ship!");
 
-      } else {
-        this.updateMessage("Computer hit your ship!");
-
-        if (this.checkGameOver()) return;
-      }
-
-      // Remain in target mode and queue new directions
-      const x = +cell.dataset.x;
-      const y = +cell.dataset.y;
       state.mode = "target";
-      state.lastHit = { x, y };
-      state.targets.push(...this.getAdjacentCells(x, y, cells));
+      state.lastHits.push({ x: target.x, y: target.y });
 
-      setTimeout(() => this.computerTurn(), 600); // Continue after hit
+      const newTargets = this.getAdjacentCells(target.x, target.y, cells);
+
+      // Add only new, non-duplicate cells
+      newTargets.forEach((nt) => {
+        if (!state.targets.some((t) => t.x === nt.x && t.y === nt.y)) {
+          state.targets.push(nt);
+        }
+      });
+
+      if (this.isShipSunk(cell.dataset.shipId, cells)) {
+        this.updateMessage("Computer sunk your ship!");
+        this.markSunkShip(shipId, cells);
+        if (this.checkGameOver()) return;
+        this.resetAI();
+        setTimeout(() => this.computerTurn(), 600);
+      } else {
+        setTimeout(() => this.computerTurn(), 600);
+      }
     } else {
       cell.classList.add("miss");
       this.updateMessage("Computer missed. It's your turn.");
-      this.playerTurn = true; // Hand control back to player
-      state.mode = "hunt";
-      state.targets = [];
-      state.lastHit = null;
+      this.playerTurn = true;
+
+      // Remove invalid target from the queue
+      state.lastTried = target; // Track last miss
+      // Filter out the missed cell from adjacent targets
+      state.targets = state.targets.filter(
+        (t) => !(t.x === target.x && t.y === target.y)
+      );
+
+      if (state.mode === "target" && state.targets.length > 0) {
+        setTimeout(() => this.computerTurn(), 600); // Continue targeting
+      } else {
+        this.playerTurn = true;
+        this.resetAI(); // Only reset if no targets left
+        this.updateMessage("Computer missed. It's your turn.");
+      }
     }
   },
 
   aiState: {
     mode: "hunt",
-    targets: [],
-    lastHit: null,
+    lastHits: [],
     direction: null,
+    targets: [],
+  },
+
+  isValidAttackCell: function (x, y) {
+    return (
+      x >= 0 &&
+      x < 10 &&
+      y >= 0 &&
+      y < 10 &&
+      !this.playerField.cells[y][x].classList.contains("disabled")
+    );
+  },
+
+  resetAI: function () {
+    this.aiState = {
+      mode: "hunt",
+      lastHits: [],
+      direction: null,
+      targets: [],
+    };
   },
 
   getAvailablePlayerCells: function () {
+    const smallestShipSize = this.getSmallestRemainingShipSize(
+      this.playerField.cells
+    );
+
     return this.playerField.cells
       .flat()
-      .filter((cell) => !cell.classList.contains("disabled"))
+      .filter((cell) => {
+        if (
+          cell.classList.contains("disabled") ||
+          cell.classList.contains("sunk")
+        ) {
+          return false;
+        }
+
+        const x = +cell.dataset.x;
+        const y = +cell.dataset.y;
+
+        // Check if at least smallest ship fits in either direction
+        const canFitHorizontally = this.checkSpace(
+          x,
+          y,
+          smallestShipSize,
+          "horizontal"
+        );
+        const canFitVertically = this.checkSpace(
+          x,
+          y,
+          smallestShipSize,
+          "vertical"
+        );
+
+        return canFitHorizontally || canFitVertically;
+      })
       .map((cell) => ({
         x: +cell.dataset.x,
         y: +cell.dataset.y,
@@ -927,32 +1039,72 @@ const sinkship = {
   },
 
   isShipSunk: function (shipId, cells) {
+    let found = 0;
+    let hit = 0;
+
     for (const row of cells) {
       for (const cell of row) {
-        if (cell.dataset.shipId === shipId && !cell.classList.contains("hit")) {
-          return false; // There's still a part not hit
+        if (cell.dataset.shipId === shipId) {
+          found++;
+          if (cell.classList.contains("hit")) hit++;
         }
       }
     }
-    return true; // All parts are hit
+
+    console.log(`Ship ID: ${shipId}, Found: ${found}, Hit: ${hit}`);
+    return found > 0 && found === hit;
+  },
+
+  markSunkShip: function (shipId, cells) {
+    let shipCells = [];
+
+    // Collect all ship parts
+    for (const row of cells) {
+      for (const cell of row) {
+        if (cell.dataset.shipId === shipId) {
+          shipCells.push(cell);
+        }
+      }
+    }
+
+    // Determine orientation
+    const isVertical =
+      shipCells.length > 1 && shipCells[0].dataset.x === shipCells[1].dataset.x;
+
+    // Get ship type from an already assigned class or infer from size
+    const shipSize = shipCells.length;
+    let shipType = "";
+
+    if (shipSize === 2) shipType = "corvette";
+    else if (shipSize === 3) shipType = "battleship";
+    else if (shipSize === 4) shipType = "destroyer";
+    else if (shipSize === 5) shipType = "submarine";
+
+    // Apply styling classes
+    shipCells.forEach((cell, index) => {
+      const className = isVertical
+        ? `ship-${shipType}-v-${index}`
+        : `ship-${shipType}-${index}`;
+      cell.classList.add("hit", "disabled", "sunk", className);
+    });
   },
 
   checkGameOver: function () {
     const playerShips = this.getRemainingShips(this.playerField.cells);
     const computerShips = this.getRemainingShips(this.computerField.cells);
-  
+
     if (computerShips === 0) {
       this.endGame("🎉 You win! All enemy ships have been sunk.");
       return true;
     }
-  
+
     if (playerShips === 0) {
       this.endGame("💥 You lost! All your ships have been sunk.");
       return true;
     }
-  
+
     return false;
-  },  
+  },
 
   getRemainingShips: function (cells) {
     const remainingShips = new Set();
@@ -971,52 +1123,176 @@ const sinkship = {
 
   endGame: function (message) {
     this.playerTurn = false;
-  
+
     // Disable interaction
     this.computerField.cells.flat().forEach((cell) => {
       cell.classList.add("disabled");
       cell.classList.remove("clickable");
     });
-  
+
     // Create overlay
     const overlay = document.createElement("div");
     overlay.classList.add("popup-overlay");
-  
+
     const popup = document.createElement("div");
     popup.classList.add("popup");
-  
+
     const resultText = document.createElement("h2");
     resultText.textContent = message;
-  
+
     const restartButton = document.createElement("button");
     restartButton.textContent = "Restart Game";
     restartButton.className = "button restart-button";
-  
+
     restartButton.addEventListener("click", () => {
-      document.body.innerHTML = "";
-      this.resetGame();
+      document.querySelector(".popup-overlay").remove();
+      this.restartGame();
     });
-  
+
     popup.appendChild(resultText);
     popup.appendChild(restartButton);
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
-  },  
+  },
 
-  resetGame: function () {
-    this.playerField = [];
-    this.computerField = [];
-    this.shipInventory = {};
+  restartGame: function () {
+    // Reset key variables
+    this.selectedShip = null;
     this.removalMode = false;
     this.playerTurn = true;
     this.shipIdCounter = 0;
     this.aiState = {
       mode: "hunt",
-      targets: [],
-      lastHit: null,
+      lastHits: [],
       direction: null,
+      targets: [],
     };
-  
-    this.init(); // Rebuild the entire game interface
-  },  
+
+    // Clear main content
+    const main = document.querySelector("main");
+    main.innerHTML = "";
+
+    // Recreate main game layout
+    const newMain = this.makeMain();
+    document.body.replaceChild(newMain, main);
+
+    // Reset button text
+    this.buildButton.textContent = "Restart";
+
+    // Reinitialize ship counts
+    for (const type in this.shipInventory) {
+      const info = this.shipInventory[type];
+      info.count = info.originalCount;
+      info.countCell.textContent = info.originalCount;
+    }
+
+    this.updateMessage(
+      "Welcome to Sink Ship! Build your fleet and start the game."
+    );
+  },
+
+  showRestartConfirmation: function () {
+    // Create container
+    const container = document.createElement("div");
+    container.classList.add("popup-overlay");
+
+    // Create popup content
+    const content = document.createElement("div");
+    content.classList.add("popup");
+
+    const message = document.createElement("p");
+    message.textContent = "Are you sure you want to restart the game?";
+    content.appendChild(message);
+
+    const buttonWrapper = document.createElement("div");
+    buttonWrapper.classList.add("popup-buttons");
+
+    const confirmBtn = document.createElement("button");
+    confirmBtn.textContent = "Yes, restart";
+    confirmBtn.classList.add("button");
+    confirmBtn.addEventListener("click", () => {
+      container.remove();
+      this.restartGame();
+    });
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.classList.add("button");
+    cancelBtn.addEventListener("click", () => {
+      container.remove();
+    });
+
+    buttonWrapper.appendChild(confirmBtn);
+    buttonWrapper.appendChild(cancelBtn);
+    content.appendChild(buttonWrapper);
+    container.appendChild(content);
+    document.body.appendChild(container);
+  },
+
+  getSmallestRemainingShipSize: function (cells) {
+    const sizes = new Set();
+
+    for (const row of cells) {
+      for (const cell of row) {
+        if (
+          cell.classList.contains("occupied") &&
+          !cell.classList.contains("hit")
+        ) {
+          const id = cell.dataset.shipId;
+          sizes.add(id); // unique ships
+        }
+      }
+    }
+
+    // Assume standard sizes
+    const shipSizes = {
+      5: 0,
+      4: 0,
+      3: 0,
+      2: 0,
+    };
+
+    for (const row of cells) {
+      for (const cell of row) {
+        if (
+          cell.classList.contains("occupied") &&
+          !cell.classList.contains("hit")
+        ) {
+          const id = cell.dataset.shipId;
+          if (!shipSizes[id]) {
+            shipSizes[id] = 0;
+          }
+          shipSizes[id]++;
+        }
+      }
+    }
+
+    const uniqueSizes = Object.values(shipSizes).filter((s) => s > 0);
+    return Math.min(...uniqueSizes, 2); // fallback to 2
+  },
+
+  checkSpace: function (x, y, size, orientation) {
+    const cells = this.playerField.cells;
+
+    for (let i = 0; i < size; i++) {
+      let nx = x;
+      let ny = y;
+
+      if (orientation === "horizontal") nx += i;
+      else ny += i;
+
+      if (nx >= 10 || ny >= 10) return false;
+
+      const cell = cells[ny][nx];
+      if (
+        cell.classList.contains("hit") ||
+        cell.classList.contains("miss") ||
+        cell.classList.contains("sunk")
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  },
 };

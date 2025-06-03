@@ -168,6 +168,47 @@ footer {
 .ship-submarine-v-3 { background-color: #52b0eea6; background-position: -500% -300%; }
 .ship-submarine-v-4 { background-color: #52b0eea6; background-position: -500% -400%; }
 
+.ship-corvette-0.sunk { background-color: #072894; background-position: 0 -100%;}
+.ship-corvette-1.sunk { background-color: #072894; background-position: -100% -100%; }
+
+.ship-corvette-v-0.sunk { background-color: #072894; background-position: -200% 0; }
+.ship-corvette-v-1.sunk { background-color: #072894; background-position: -200% -100%; }
+
+.ship-battleship-0.sunk { background-color: #072894; background-position: 0 -200%; }
+.ship-battleship-1.sunk { background-color: #072894; background-position: -100% -200%; }
+.ship-battleship-2.sunk { background-color: #072894; background-position: -200% -200%; }
+
+.ship-battleship-v-0.sunk { background-color: #072894; background-position: -300% 0; }
+.ship-battleship-v-1.sunk { background-color: #072894; background-position: -300% -100%; }
+.ship-battleship-v-2.sunk { background-color: #072894; background-position: -300% -200%; }
+
+.ship-destroyer-0.sunk { background-color: #072894; background-position: 0 -300%; }
+.ship-destroyer-1.sunk { background-color: #072894; background-position: -100% -300%; }
+.ship-destroyer-2.sunk { background-color: #072894; background-position: -200% -300%; }
+.ship-destroyer-3.sunk { background-color: #072894; background-position: -300% -300%; }
+
+.ship-destroyer-v-0.sunk { background-color: #072894; background-position: -400% 0; }
+.ship-destroyer-v-1.sunk { background-color: #072894; background-position: -400% -100%; }
+.ship-destroyer-v-2.sunk { background-color: #072894; background-position: -400% -200%; }
+.ship-destroyer-v-3.sunk { background-color: #072894; background-position: -400% -300%; }
+
+.ship-submarine-0.sunk { background-color: #072894; background-position: 0 -400%; }
+.ship-submarine-1.sunk { background-color: #072894; background-position: -100% -400%; }
+.ship-submarine-2.sunk { background-color: #072894; background-position: -200% -400%; }
+.ship-submarine-3.sunk { background-color: #072894; background-position: -300% -400%; }
+.ship-submarine-4.sunk { background-color: #072894; background-position: -400% -400%; }
+
+.ship-submarine-v-0.sunk { background-color: #072894; background-position: -500% 0; }
+.ship-submarine-v-1.sunk { background-color: #072894; background-position: -500% -100%; }
+.ship-submarine-v-2.sunk { background-color: #072894; background-position: -500% -200%; }
+.ship-submarine-v-3.sunk { background-color: #072894; background-position: -500% -300%; }
+.ship-submarine-v-4.sunk { background-color: #072894; background-position: -500% -400%; }
+
+.cell.sunk {
+    background-image: url(images/sunken_ships.svg);
+    background-size: 600% 500%;
+} 
+
 .ship-option {
     display: inline-block;
     width: 30px;
