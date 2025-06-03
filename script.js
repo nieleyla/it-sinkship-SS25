@@ -1342,7 +1342,7 @@ function applyShipSprite(cell, type, orientation, index, isSunk = false) {
   }
 
   const bgImage = isSunk
-    ? "url('images/sunken_ships.svg'), url('images/ships.webp')"
+    ? "url('images/sunken_ships.webp'), url('images/ships.webp')"
     : "url('images/ships.webp'), url('images/ships.webp')";
 
   cell.classList.add("ship");
