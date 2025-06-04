@@ -368,8 +368,9 @@ const sinkship = {
   clearPreview: function () {
     this.playerField.cells.flat().forEach((cell) => {
       cell.classList.remove("preview");
-      if (!this.isMobile) {
-        cell.classList.remove("blocked"); // mobile keeps blocked cells to guide touch users
+
+      if (!this.isMobile || !this.selectedShip) {
+        cell.classList.remove("blocked"); // Only clear blocked if not mobile or no ship selected
       }
     });
   },
@@ -429,8 +430,8 @@ const sinkship = {
       this.selectedShip = null;
     }
 
-    if (this.isMobile) {
-      this.markInvalidCells(); // update blocked cells after placing
+    if (this.isMobile && this.selectedShip) {
+      this.markInvalidCells(); // Refresh blocked cells based on next possible placements
     }
   },
 
@@ -672,6 +673,7 @@ const sinkship = {
   // Mark invalid cells for ship placement
   markInvalidCells: function () {
     const ship = this.selectedShip;
+    
     if (!ship) return;
 
     const cells = this.playerField.cells;
@@ -1336,6 +1338,8 @@ function applyShipSprite(cell, type, orientation, index, isSunk = false) {
 
   let shipPos = getShipSpritePosition(type, orientation, index);
 
+  cell.classList.add("occupied");
+
   // If it's a hit (but not sunk), use hit layer
   if (cell.classList.contains("hit") && !isSunk) {
     shipPos = "-100% 0"; // Position of the hit icon in ships.webp
@@ -1390,6 +1394,7 @@ function getShipSpritePosition(type, orientation, index) {
 
 function resetShipCell(cell) {
   cell.className = "cell"; // Reset classes
+  cell.classList.remove("blocked");
   cell.style.backgroundImage = "";
   cell.style.backgroundSize = "";
   cell.style.backgroundPosition = "";
