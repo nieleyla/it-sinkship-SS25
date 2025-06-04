@@ -104,6 +104,7 @@ footer {
     aspect-ratio: 1 / 1;
     flex: 1 1 300px;
     max-width: 400px;
+    min-width: 300px;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(10, 1fr);
@@ -114,7 +115,6 @@ footer {
     flex-direction: column;
     align-items: center;
     padding: 1em;
-    width: 100%;
     max-width: 400px;
     box-sizing: border-box;
 }
@@ -123,6 +123,7 @@ footer {
     width: 100%;
     table-layout: auto;
     font-size: clamp(13px, 3vw, 15px);
+
 }
 
 #menu td {
@@ -137,7 +138,6 @@ footer {
 
 #menu td:nth-child(2),
 #menu td:nth-child(3) {
-    width: 50px;
     height: 50px;
     background-color: #cdefff;
     border: #cdefff 2px solid;
