@@ -85,10 +85,12 @@ const sinkship = {
 
     const headline = document.createElement("h1");
     headline.textContent = "Sink Ship";
+    headline.classList.add("title");
     limiter.appendChild(headline);
 
     const copyright = document.createElement("p");
     copyright.innerHTML = "by Leyla Niederberger";
+    copyright.classList.add("subtitle");
     limiter.appendChild(copyright);
 
     header.appendChild(limiter);
@@ -134,6 +136,7 @@ const sinkship = {
 
     const footerLine = document.createElement("p");
     footerLine.innerHTML = "&copy; Leyla Niederberger 2025";
+    footerLine.classList.add("copyright");
 
     limiter.appendChild(footerLine);
     footer.appendChild(limiter);
@@ -377,11 +380,21 @@ const sinkship = {
       return;
     }
 
+    // Clear previous selection styling
+    this.clearShipSelection();
+
     this.selectedShip = {
       type: ship.type,
       size: ship.size,
       orientation: orientation,
     };
+    
+    // Add visual feedback for selected ship
+    this.highlightSelectedShip(ship, orientation);
+    
+    // Show selection message
+    const orientationText = orientation === "horizontal" ? "horizontal" : "vertical";
+    this.showMessage(`${ship.type} selected for ${orientationText} placement. Click on the grid to place it.`);
     
     if (this.isMobile) {
       this.markInvalidCells();
@@ -404,8 +417,18 @@ const sinkship = {
   // Toggle removal mode
   toggleRemovalMode: function (button) {
     this.selectedShip = null;
+    this.clearShipSelection();
     this.removalMode = !this.removalMode;
     button.classList.toggle("active", this.removalMode);
+    
+    // Update button text and show message
+    if (this.removalMode) {
+      button.textContent = "Exit Remove Mode";
+      this.showMessage("Removal mode active. Click on any ship to remove it.");
+    } else {
+      button.textContent = "Remove Ships";
+      this.showMessage(GAME_CONFIG.MESSAGES.WELCOME);
+    }
     
     // Clear blocked cells when no ship is selected (mobile)
     if (this.isMobile && !this.selectedShip) {
@@ -542,12 +565,26 @@ const sinkship = {
 
   // Handle logic after ship placement
   handlePostPlacement: function (inventory) {
+    const shipType = this.selectedShip.type;
+    
     if (inventory.count === 0) {
       this.selectedShip = null;
-      // Clear blocked cells when no more ships of this type (mobile)
+      this.clearShipSelection();
+      
+      // Check if ALL ships are placed
+      const allShipsPlaced = Object.values(this.shipInventory).every(entry => entry.count === 0);
+      
+      if (allShipsPlaced) {
+        this.showMessage("All ships placed. Press 'Start Game' to begin battle.");
+      } else {
+        this.showMessage(`${shipType} placed! No more ${shipType}s available. Select another ship to continue.`);
+      }
+      
       if (this.isMobile) {
         this.clearBlockedCells();
       }
+    } else {
+      this.showMessage(`${shipType} placed! ${inventory.count} more ${shipType}(s) available. Click to place another or select a different ship.`);
     }
 
     if (this.isMobile && this.selectedShip) {
@@ -573,6 +610,38 @@ const sinkship = {
             cell.style.pointerEvents = "none";
             cell.style.opacity = "0.5";
           }
+        });
+      }
+    });
+  },
+
+  // Highlight the selected ship option
+  highlightSelectedShip: function (ship, orientation) {
+    const inventory = this.shipInventory[ship.type];
+    if (!inventory || !inventory.optionCells) return;
+
+    // Find the correct option cell (horizontal = index 0, vertical = index 1)
+    const targetIndex = orientation === "horizontal" ? 0 : 1;
+    const targetCell = inventory.optionCells[targetIndex];
+    
+    if (targetCell) {
+      targetCell.classList.add("selected");
+      targetCell.style.backgroundColor = "#17a2ff";
+      targetCell.style.borderColor = "#ffffff";
+      targetCell.style.boxShadow = "0 0 8px rgba(23, 162, 255, 0.6)";
+    }
+  },
+
+  // Clear all ship selection highlighting
+  clearShipSelection: function () {
+    Object.keys(this.shipInventory).forEach(shipType => {
+      const inventory = this.shipInventory[shipType];
+      if (inventory && inventory.optionCells) {
+        inventory.optionCells.forEach(cell => {
+          cell.classList.remove("selected");
+          cell.style.backgroundColor = "";
+          cell.style.borderColor = "";
+          cell.style.boxShadow = "";
         });
       }
     });
@@ -627,7 +696,10 @@ const sinkship = {
     const cell = this.playerField.cells[row][col];
     const classes = Array.from(cell.classList);
     const shipClass = classes.find((c) => c.startsWith("ship-"));
-    if (!shipClass) return;
+    if (!shipClass) {
+      this.showMessage("No ship here. Click on a ship to remove it.");
+      return;
+    }
 
     // Extract ship type and orientation from class
     const match = shipClass.match(/^ship-(\w+)(-v)?-(\d+)/);
@@ -690,6 +762,10 @@ const sinkship = {
       inventory.countCell.textContent = inventory.count;
       this.updateShipOptionsVisibility();
       this.checkIfAllShipsPlaced();
+      
+      // Show success message
+      const shipTypeName = type.charAt(0).toUpperCase() + type.slice(1);
+      this.showMessage(`${shipTypeName} removed. Click another ship to remove it or exit remove mode.`);
     }
 
     if (this.isMobile) {
@@ -796,9 +872,12 @@ const sinkship = {
   },
 
   autoPlaceShips: function () {
+    this.selectedShip = null;
+    this.clearShipSelection();
     this.resetPlayerField();
     this.placeShipsRandomly(this.playerField.cells, true);
     this.checkIfAllShipsPlaced();
+    this.showMessage("Ships automatically placed! Click 'Start Game' to begin battle.");
   },
 
   // Reset player field to initial state
@@ -1359,6 +1438,9 @@ const sinkship = {
       this.clearBlockedCells();
     }
 
+    // Clear ship selection highlighting
+    this.clearShipSelection();
+
     // Clear main content
     const main = document.querySelector("main");
     main.innerHTML = "";
@@ -1375,6 +1457,13 @@ const sinkship = {
       const info = this.shipInventory[type];
       info.count = info.originalCount;
       info.countCell.textContent = info.originalCount;
+    }
+
+    // Reset remove button text if it was in removal mode
+    const removeButton = document.querySelector(".remove-button");
+    if (removeButton) {
+      removeButton.textContent = "Remove Ships";
+      removeButton.classList.remove("active");
     }
 
     this.showMessage(GAME_CONFIG.MESSAGES.WELCOME);
