@@ -320,6 +320,7 @@ const sinkship = {
       originalCount: ship.count,
       countCell: countCell,
       size: ship.size,
+      optionCells: [], // Will store the clickable ship option cells
     };
 
     // Create ship option cells
@@ -358,11 +359,24 @@ const sinkship = {
       this.selectShip(ship, orientation);
     });
 
+    // Store reference to this option cell for later enabling/disabling
+    if (!this.shipInventory[ship.type]) {
+      this.shipInventory[ship.type] = { optionCells: [] };
+    }
+    this.shipInventory[ship.type].optionCells.push(cell);
+
     return cell;
   },
 
   // Select a ship for placement
   selectShip: function (ship, orientation) {
+    // Check if ship is available
+    const inventory = this.shipInventory[ship.type];
+    if (!inventory || inventory.count <= 0) {
+      this.showMessage(GAME_CONFIG.MESSAGES.NO_SHIPS);
+      return;
+    }
+
     this.selectedShip = {
       type: ship.type,
       size: ship.size,
@@ -392,6 +406,11 @@ const sinkship = {
     this.selectedShip = null;
     this.removalMode = !this.removalMode;
     button.classList.toggle("active", this.removalMode);
+    
+    // Clear blocked cells when no ship is selected (mobile)
+    if (this.isMobile && !this.selectedShip) {
+      this.clearBlockedCells();
+    }
   },
 
   // Preview ship placement to show potential position
@@ -517,6 +536,7 @@ const sinkship = {
   updateInventory: function (inventory) {
     inventory.count--;
     inventory.countCell.textContent = inventory.count;
+    this.updateShipOptionsVisibility();
     this.checkIfAllShipsPlaced();
   },
 
@@ -524,11 +544,38 @@ const sinkship = {
   handlePostPlacement: function (inventory) {
     if (inventory.count === 0) {
       this.selectedShip = null;
+      // Clear blocked cells when no more ships of this type (mobile)
+      if (this.isMobile) {
+        this.clearBlockedCells();
+      }
     }
 
     if (this.isMobile && this.selectedShip) {
       this.markInvalidCells();
     }
+  },
+
+  // Update visual state of ship options based on availability
+  updateShipOptionsVisibility: function () {
+    Object.keys(this.shipInventory).forEach(shipType => {
+      const inventory = this.shipInventory[shipType];
+      const isAvailable = inventory.count > 0;
+      
+      // Update all option cells for this ship type
+      if (inventory.optionCells) {
+        inventory.optionCells.forEach(cell => {
+          if (isAvailable) {
+            cell.classList.remove("disabled");
+            cell.style.pointerEvents = "auto";
+            cell.style.opacity = "1";
+          } else {
+            cell.classList.add("disabled");
+            cell.style.pointerEvents = "none";
+            cell.style.opacity = "0.5";
+          }
+        });
+      }
+    });
   },
 
   // Show message to user
@@ -641,6 +688,7 @@ const sinkship = {
     if (inventory) {
       inventory.count++;
       inventory.countCell.textContent = inventory.count;
+      this.updateShipOptionsVisibility();
       this.checkIfAllShipsPlaced();
     }
 
@@ -689,8 +737,17 @@ const sinkship = {
   startGame: function () {
     this.showMessage(GAME_CONFIG.MESSAGES.GAME_START);
     this.disableSetupControls();
+    this.clearMobileBlockedCells();
     this.setupComputerField();
     this.replaceMenuWithComputerField();
+  },
+
+  // Clear blocked cells when starting game (especially for mobile)
+  clearMobileBlockedCells: function () {
+    if (this.isMobile) {
+      this.clearBlockedCells();
+      this.selectedShip = null;
+    }
   },
 
   // Disable setup phase controls
@@ -752,6 +809,9 @@ const sinkship = {
       inventory.count = inventory.originalCount;
       inventory.countCell.textContent = inventory.count;
     });
+    
+    // Update ship option visibility
+    this.updateShipOptionsVisibility();
 
     // Clear all cells
     this.playerField.cells.flat().forEach((cell) => {
@@ -1293,6 +1353,11 @@ const sinkship = {
       direction: null,
       targets: [],
     };
+    
+    // Clear any blocked cells from mobile mode
+    if (this.isMobile) {
+      this.clearBlockedCells();
+    }
 
     // Clear main content
     const main = document.querySelector("main");
