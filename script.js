@@ -8,8 +8,8 @@ const GAME_CONFIG = {
     { count: 1, type: "Submarine", size: 5 },
   ],
   TIMING: {
-    COMPUTER_TURN_DELAY: 600,      // Time in ms before computer makes its move
-    COMPUTER_FIRST_TURN_DELAY: 1000, // Longer delay for first computer turn after player attack
+    COMPUTER_TURN_DELAY: 1000,      // Time in ms before computer makes its move
+    COMPUTER_FIRST_TURN_DELAY: 1500, // Longer delay for first computer turn after player attack
   },
   CELL_CLASSES: {
     CELL: "cell",
@@ -39,6 +39,16 @@ const GAME_CONFIG = {
     NO_SHIPS: "No more ships available.",
     RESTART_CONFIRM: "Are you sure you want to restart the game?"
   },
+  COMPUTER_MOODS: {
+    READY: "mood-look-down",
+    THINKING: "mood-puzzled", 
+    HIT_BY_PLAYER: "mood-cry",
+    SHIP_SUNK_BY_PLAYER: "mood-wrrr",
+    HIT_PLAYER: "mood-smile",
+    SUNK_PLAYER_SHIP: "mood-happy",
+    LOST: "mood-sad-dizzy",
+    WON: "mood-tongue"
+  },
   DIRECTIONS: [
     { x: 0, y: -1 }, // North
     { x: 1, y: 0 },  // East
@@ -67,6 +77,7 @@ const sinkship = {
     direction: null,
     targets: [],
   },
+  currentComputerMood: GAME_CONFIG.COMPUTER_MOODS.READY,
 
   init: function () {
     try {
@@ -109,6 +120,9 @@ const sinkship = {
     // Create a Message Area
     const messageArea = this.createMessageArea();
 
+    // Create computer mood display
+    const moodDisplay = this.createComputerMoodDisplay();
+
     // Create fields container
     const fields = this.makeDiv();
     fields.classList.add("fields");
@@ -124,6 +138,7 @@ const sinkship = {
 
     limiter.appendChild(controls);
     limiter.appendChild(messageArea);
+    limiter.appendChild(moodDisplay);
     limiter.appendChild(fields);
 
     return main;
@@ -138,7 +153,12 @@ const sinkship = {
     footerLine.innerHTML = "&copy; Leyla Niederberger 2025";
     footerLine.classList.add("copyright");
 
+    const attribution = document.createElement("p");
+    attribution.innerHTML = "Icons: Tabler Icons";
+    attribution.classList.add("attribution");
+
     limiter.appendChild(footerLine);
+    limiter.appendChild(attribution);
     footer.appendChild(limiter);
 
     return footer;
@@ -812,6 +832,7 @@ const sinkship = {
   // Start Game and swap fields
   startGame: function () {
     this.showMessage(GAME_CONFIG.MESSAGES.GAME_START);
+    this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.READY);
     this.disableSetupControls();
     this.clearMobileBlockedCells();
     this.setupComputerField();
@@ -1051,9 +1072,11 @@ const sinkship = {
 
     if (this.isShipSunk(shipId, this.computerField.cells)) {
       this.showMessage(GAME_CONFIG.MESSAGES.HIT_SUNK);
+      this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.SHIP_SUNK_BY_PLAYER);
       this.markSunkShip(shipId, this.computerField.cells);
     } else {
       this.showMessage(GAME_CONFIG.MESSAGES.HIT);
+      this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.HIT_BY_PLAYER);
     }
   },
 
@@ -1061,12 +1084,15 @@ const sinkship = {
   processPlayerMiss: function (cell) {
     cell.classList.add(GAME_CONFIG.CELL_CLASSES.MISS);
     this.showMessage(GAME_CONFIG.MESSAGES.MISS_PLAYER);
+    this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.THINKING);
     this.playerTurn = false;
   },
 
   // Computer's turn logic
   computerTurn: function () {
     if (this.playerTurn) return;
+
+    this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.THINKING);
 
     const cells = this.playerField.cells;
     const state = this.aiState;
@@ -1152,6 +1178,7 @@ const sinkship = {
 
       const shipId = cell.dataset.shipId;
       this.showMessage(GAME_CONFIG.MESSAGES.COMPUTER_HIT);
+      this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.HIT_PLAYER);
 
       state.mode = "target";
       state.lastHits.push({ x: target.x, y: target.y });
@@ -1160,6 +1187,7 @@ const sinkship = {
 
       if (this.isShipSunk(cell.dataset.shipId, cells)) {
         this.showMessage(GAME_CONFIG.MESSAGES.COMPUTER_SUNK);
+        this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.SUNK_PLAYER_SHIP);
         this.markSunkShip(shipId, cells);
         if (this.checkGameOver()) return;
         this.resetAI();
@@ -1245,6 +1273,7 @@ const sinkship = {
   processComputerMiss: function (cell, target, state) {
     cell.classList.add(GAME_CONFIG.CELL_CLASSES.MISS);
     this.showMessage(GAME_CONFIG.MESSAGES.MISS_COMPUTER);
+    this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.READY);
     this.playerTurn = true;
 
     // Filter out the missed cell from adjacent targets
@@ -1372,6 +1401,14 @@ const sinkship = {
   // End the game with a message and restart option
   endGame: function (message) {
     this.playerTurn = false;
+    
+    // Update computer mood based on who won
+    if (message === GAME_CONFIG.MESSAGES.PLAYER_WIN) {
+      this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.LOST);
+    } else if (message === GAME_CONFIG.MESSAGES.COMPUTER_WIN) {
+      this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.WON);
+    }
+    
     this.disableComputerField();
     this.showGameEndPopup(message);
   },
@@ -1392,6 +1429,9 @@ const sinkship = {
     const resultText = document.createElement("h2");
     resultText.textContent = message;
 
+    // Add computer mood display to the popup
+    const popupMoodDisplay = this.createPopupMoodDisplay();
+
     const restartButton = this.createButton("Restart Game", () => {
       document.querySelector(".popup-overlay").remove();
       this.restartGame();
@@ -1399,6 +1439,7 @@ const sinkship = {
     restartButton.className = "button restart-button";
 
     popup.appendChild(resultText);
+    popup.appendChild(popupMoodDisplay);
     popup.appendChild(restartButton);
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
@@ -1418,6 +1459,25 @@ const sinkship = {
     return popup;
   },
 
+  // Create computer mood display for popup
+  createPopupMoodDisplay: function () {
+    const moodContainer = this.makeDiv();
+    moodContainer.classList.add("popup-mood");
+    
+    const moodLabel = document.createElement("span");
+    moodLabel.textContent = "CPU: ";
+    moodLabel.classList.add("popup-mood-label");
+    
+    const moodIcon = document.createElement("div");
+    moodIcon.classList.add("popup-mood-icon");
+    moodIcon.innerHTML = this.getMoodSVG(this.currentComputerMood);
+    
+    moodContainer.appendChild(moodLabel);
+    moodContainer.appendChild(moodIcon);
+    
+    return moodContainer;
+  },
+
   // Restart the game
   restartGame: function () {
     // Reset key variables
@@ -1426,6 +1486,7 @@ const sinkship = {
     this.playerTurn = true;
     this.shipIdCounter = 0;
     this.shipInventory = {};
+    this.currentComputerMood = GAME_CONFIG.COMPUTER_MOODS.READY;
     this.aiState = {
       mode: "hunt",
       lastHits: [],
@@ -1563,6 +1624,50 @@ const sinkship = {
       }
     }
     return true;
+  },
+
+  // Create computer mood display
+  createComputerMoodDisplay: function () {
+    const moodContainer = this.makeDiv();
+    moodContainer.classList.add("computer-mood");
+    
+    const moodLabel = document.createElement("span");
+    moodLabel.textContent = "CPU: ";
+    moodLabel.classList.add("mood-label");
+    
+    const moodIcon = document.createElement("div");
+    moodIcon.classList.add("mood-icon");
+    moodIcon.innerHTML = this.getMoodSVG(this.currentComputerMood);
+    
+    moodContainer.appendChild(moodLabel);
+    moodContainer.appendChild(moodIcon);
+    
+    return moodContainer;
+  },
+
+  // Get SVG content for mood icon
+  getMoodSVG: function (moodName) {
+    const svgMap = {
+      [GAME_CONFIG.COMPUTER_MOODS.READY]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M9 13h.01" /><path d="M15 13h.01" /><path d="M11 17h2" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.THINKING]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14.986 3.51a9 9 0 1 0 1.514 16.284c2.489 -1.437 4.181 -3.978 4.5 -6.794" /><path d="M10 10h.01" /><path d="M14 8h.01" /><path d="M12 15c1 -1.333 2 -2 3 -2" /><path d="M20 9v.01" /><path d="M20 6a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.HIT_BY_PLAYER]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 10l.01 0" /><path d="M15 10l.01 0" /><path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" /><path d="M17.566 17.606a2 2 0 1 0 2.897 .03l-1.463 -1.636l-1.434 1.606z" /><path d="M20.865 13.517a8.937 8.937 0 0 0 .135 -1.517a9 9 0 1 0 -9 9c.69 0 1.36 -.076 2 -.222" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.SHIP_SUNK_BY_PLAYER]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 21a9 9 0 1 1 0 -18a9 9 0 0 1 0 18z" /><path d="M8 16l1 -1l1.5 1l1.5 -1l1.5 1l1.5 -1l1 1" /><path d="M8.5 11.5l1.5 -1.5l-1.5 -1.5" /><path d="M15.5 11.5l-1.5 -1.5l1.5 -1.5" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.HIT_PLAYER]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 10l.01 0" /><path d="M15 10l.01 0" /><path d="M9.5 15a3.5 3.5 0 0 0 5 0" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.SUNK_PLAYER_SHIP]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 9l.01 0" /><path d="M15 9l.01 0" /><path d="M8 13a4 4 0 1 0 8 0h-8" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.LOST]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M14.5 16.05a3.5 3.5 0 0 0 -5 0" /><path d="M8 9l2 2" /><path d="M10 9l-2 2" /><path d="M14 9l2 2" /><path d="M16 9l-2 2" /></svg>`,
+      [GAME_CONFIG.COMPUTER_MOODS.WON]: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mood-svg"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 10l.01 0" /><path d="M15 10l.01 0" /><path d="M10 14v2a2 2 0 0 0 4 0v-2m1.5 0h-7" /></svg>`
+    };
+    
+    return svgMap[moodName] || svgMap[GAME_CONFIG.COMPUTER_MOODS.READY];
+  },
+
+  // Update computer mood display
+  updateComputerMood: function (newMood) {
+    this.currentComputerMood = newMood;
+    const moodIcon = document.querySelector(".mood-icon");
+    if (moodIcon) {
+      moodIcon.innerHTML = this.getMoodSVG(newMood);
+    }
   },
 };
 
