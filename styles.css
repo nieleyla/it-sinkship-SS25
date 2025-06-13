@@ -118,12 +118,21 @@ body {
   text-align: center;
 }
 
+.title {
+  margin-top: 1rem;
+}
+
 .title,
 .subtitle,
 .copyright {
   text-shadow:
     0 2px 8px rgba(0,0,0,0.45),
     0 0px 1px rgba(0,0,0,0.25);
+}
+
+.copyright,
+.attribution {
+  font-size: 1rem !important;
 }
 
 .limiter p {
@@ -148,7 +157,7 @@ footer {
   padding: var(--spacing-lg);
   text-align: left;
   color: var(--color-text-light);
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .attribution {
@@ -168,7 +177,7 @@ footer {
   justify-content: center;
   flex-wrap: wrap;
   gap: var(--spacing-sm);
-  margin: var(--spacing-md) auto;
+  margin: var(--spacing-sm) auto var(--spacing-md) auto;
 }
 
 .button {
@@ -269,6 +278,7 @@ footer {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: flex-start;
   gap: var(--spacing-md);
   margin: 0 var(--spacing-xxl);
 }
@@ -350,60 +360,60 @@ footer {
 }
 
 /* ===================================
-   SHIP MENU
+   SHIP MENU (inherits all sizing from .field)
    =================================== */
-#menu {
+.field#menu {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: var(--spacing-md);
-  max-width: var(--field-max-width);
+  justify-content: space-between;
 }
 
-#menu table {
+.field#menu table {
   width: 100%;
-  table-layout: auto;
-  font-size: clamp(13px, 3vw, 15px);
+  table-layout: fixed;
+  font-size: clamp(12px, 3vw, 14px);
   border-collapse: separate;
-  border-spacing: var(--spacing-xs);
+  border-spacing: 4px;
+  flex: 1;
 }
 
-#menu td,
-#menu th {
-  padding: var(--spacing-sm);
+.field#menu td,
+.field#menu th {
+  padding: 4px 6px;
   text-align: center;
+  font-size: clamp(11px, 2.5vw, 13px);
 }
 
-#menu th {
+.field#menu th {
   text-align: left;
   font-weight: 600;
 }
 
-#menu td:nth-child(4),
-#menu th:nth-child(4) {
+.field#menu td:nth-child(4),
+.field#menu th:nth-child(4) {
   text-align: left;
-  padding-left: var(--spacing-sm);
+  padding-left: 4px;
 }
 
 /* Ship option cells */
-#menu td:nth-child(2),
-#menu td:nth-child(3) {
-  height: 50px;
+.field#menu td:nth-child(2),
+.field#menu td:nth-child(3) {
+  height: clamp(35px, 10vw, 50px);
   background-color: var(--color-menu-blue);
   border: var(--border-menu);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background-color var(--transition-fast), transform var(--transition-fast);
   user-select: none;
 }
 
-#menu tbody td:nth-child(2):hover,
-#menu tbody td:nth-child(3):hover {
+.field#menu tbody td:nth-child(2):hover,
+.field#menu tbody td:nth-child(3):hover {
   background-color: var(--color-menu-hover);
 }
 
-#menu tbody td:nth-child(2):active,
-#menu tbody td:nth-child(3):active {
+.field#menu tbody td:nth-child(2):active,
+.field#menu tbody td:nth-child(3):active {
   transform: scale(0.97);
   background: var(--bg-button-active);
 }
@@ -413,23 +423,25 @@ footer {
   display: inline-block;
   background-color: var(--color-dark);
   border: 1px solid var(--color-black);
-  width: 28px;
-  height: 6px;
+  width: clamp(24px, 6vw, 32px);
+  height: clamp(5px, 1.5vw, 8px);
   border-radius: 2px;
 }
 
 .ship-option.v {
-  width: 6px;
-  height: 28px;
-  margin: 0 11px;
+  width: clamp(5px, 1.5vw, 8px);
+  height: clamp(24px, 6vw, 32px);
+  margin: 0 auto;
 }
 
 /* Remove button in menu */
-#menu .remove-button {
-  width: 90%;
-  margin-top: var(--spacing-md);
-  font-size: clamp(13px, 2.5vw, 15px);
+.field#menu .remove-button {
+  width: 100%;
+  height: clamp(32px, 8vw, 42px);
+  font-size: clamp(11px, 2.5vw, 13px);
   white-space: nowrap;
+  padding: 6px 12px;
+  margin: 0;
 }
 
 /* ===================================
@@ -474,7 +486,7 @@ footer {
   color: rgba(0, 0, 0, 0.8);
   text-align: center;
   border-radius: var(--radius-sm);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -572,6 +584,7 @@ footer {
   display: flex;
   gap: var(--spacing-md);
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   margin-top: var(--spacing-md);
   flex-direction: column;
@@ -600,17 +613,27 @@ footer {
    =================================== */
 @media (max-width: 768px) {
   .fields {
-    margin: 0 var(--spacing-md);
+    margin: 0 var(--spacing-sm);
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    padding: 0 var(--spacing-sm);
   }
   
   .field {
-    max-width: min(90vw, var(--field-max-width));
+    width: min(85vw, var(--field-max-width));
+    max-width: min(85vw, var(--field-max-width));
+    min-width: min(280px, 85vw);
+  }
+  
+  .controls {
+    width: 90%;
+    max-width: 600px;
   }
   
   .button {
-    width: min(90vw, var(--button-width));
+    width: 100%;
+    max-width: 600px;
     font-size: 1rem;
   }
   
@@ -644,11 +667,16 @@ footer {
   }
   
   .limiter {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
   }
   
   header {
     font-size: 1.3rem;
+  }
+  
+  footer {
+    font-size: 0.6rem;
+    padding: var(--spacing-md);
   }
   
   .controls {
@@ -662,8 +690,9 @@ footer {
   }
   
   .field {
-    max-width: 95vw;
-    min-width: 280px;
+    width: min(90vw, 350px);
+    max-width: min(90vw, 350px);
+    min-width: min(280px, 90vw);
   }
   
   .computer-mood {
@@ -721,7 +750,13 @@ footer {
 
 /* Extremely small screens */
 @media (max-width: 320px) {
+  .limiter {
+    padding: 8px;
+  }
+  
   .field {
+    width: min(92vw, 280px);
+    max-width: min(92vw, 280px);
     min-width: 260px;
     padding: var(--spacing-sm);
   }
@@ -730,7 +765,30 @@ footer {
     min-height: 20px;
   }
   
-  #menu table {
-    font-size: 12px;
+  .field#menu table {
+    font-size: 10px;
+    border-spacing: 2px;
+  }
+  
+  .field#menu td,
+  .field#menu th {
+    padding: 2px 3px;
+    font-size: 9px;
+  }
+  
+  .field#menu .remove-button {
+    font-size: 9px;
+    height: 28px;
+    padding: 4px 6px;
+  }
+  
+  .ship-option {
+    width: 20px;
+    height: 4px;
+  }
+  
+  .ship-option.v {
+    width: 4px;
+    height: 20px;
   }
 }

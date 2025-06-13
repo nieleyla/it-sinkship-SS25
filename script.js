@@ -400,8 +400,11 @@ const sinkship = {
       return;
     }
 
-    // Clear previous selection styling
+    // Clear previous selection styling and blocked cells
     this.clearShipSelection();
+    if (this.isMobile) {
+      this.clearBlockedCells();
+    }
 
     this.selectedShip = {
       type: ship.type,
@@ -416,6 +419,7 @@ const sinkship = {
     const orientationText = orientation === "horizontal" ? "horizontal" : "vertical";
     this.showMessage(`${ship.type} selected for ${orientationText} placement. Click on the grid to place it.`);
     
+    // Mark invalid cells for mobile after setting the selected ship
     if (this.isMobile) {
       this.markInvalidCells();
     }
@@ -597,14 +601,14 @@ const sinkship = {
       if (allShipsPlaced) {
         this.showMessage("All ships placed. Press 'Start Game' to begin battle.");
       } else {
-        this.showMessage(`${shipType} placed! No more ${shipType}s available. Select another ship to continue.`);
+        this.showMessage(`${shipType} placed! No more ${shipType}s available.`);
       }
       
       if (this.isMobile) {
         this.clearBlockedCells();
       }
     } else {
-      this.showMessage(`${shipType} placed! ${inventory.count} more ${shipType}(s) available. Click to place another or select a different ship.`);
+      this.showMessage(`${shipType} placed! ${inventory.count} more ${shipType}(s) available.`);
     }
 
     if (this.isMobile && this.selectedShip) {
@@ -665,6 +669,11 @@ const sinkship = {
         });
       }
     });
+    
+    // Clear blocked cells when no ship is selected (mobile)
+    if (this.isMobile && !this.selectedShip) {
+      this.clearBlockedCells();
+    }
   },
 
   // Show message to user
@@ -843,8 +852,8 @@ const sinkship = {
   clearMobileBlockedCells: function () {
     if (this.isMobile) {
       this.clearBlockedCells();
-      this.selectedShip = null;
     }
+    this.selectedShip = null;
   },
 
   // Disable setup phase controls
@@ -982,7 +991,7 @@ const sinkship = {
   // Mark invalid cells for ship placement
   markInvalidCells: function () {
     const ship = this.selectedShip;
-    if (!ship) return;
+    if (!ship || !this.isMobile) return;
 
     const cells = this.playerField.cells;
 
