@@ -601,14 +601,14 @@ const sinkship = {
       if (allShipsPlaced) {
         this.showMessage("All ships placed. Press 'Start Game' to begin battle.");
       } else {
-        this.showMessage(`${shipType} placed! No more ${shipType}s available. Select another ship to continue.`);
+        this.showMessage(`${shipType} placed! No more ${shipType}s available.`);
       }
       
       if (this.isMobile) {
         this.clearBlockedCells();
       }
     } else {
-      this.showMessage(`${shipType} placed! ${inventory.count} more ${shipType}(s) available. Click to place another or select a different ship.`);
+      this.showMessage(`${shipType} placed! ${inventory.count} more ${shipType}(s) available.`);
     }
 
     if (this.isMobile && this.selectedShip) {
