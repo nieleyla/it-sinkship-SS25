@@ -118,6 +118,10 @@ body {
   text-align: center;
 }
 
+.title {
+  margin-top: 1rem;
+}
+
 .title,
 .subtitle,
 .copyright {
