@@ -8,12 +8,12 @@ const GAME_CONFIG = {
     { count: 1, type: "Submarine", size: 5 },
   ],
   TIMING: {
-    COMPUTER_TURN_DELAY: 1000,      // Time in ms before computer makes its move
+    COMPUTER_TURN_DELAY: 1000, // Time in ms before computer makes its move
     COMPUTER_FIRST_TURN_DELAY: 1500, // Longer delay for first computer turn after player attack
   },
   CELL_CLASSES: {
     CELL: "cell",
-    OCCUPIED: "occupied", 
+    OCCUPIED: "occupied",
     SHIP: "ship",
     WATER: "water",
     PREVIEW: "preview",
@@ -22,7 +22,7 @@ const GAME_CONFIG = {
     MISS: "miss",
     SUNK: "sunk",
     DISABLED: "disabled",
-    CLICKABLE: "clickable"
+    CLICKABLE: "clickable",
   },
   MESSAGES: {
     WELCOME: "Welcome to Sink Ship! Build your fleet and start the game.",
@@ -37,24 +37,24 @@ const GAME_CONFIG = {
     COMPUTER_WIN: "💥 You lost! All your ships have been sunk.",
     INVALID_PLACEMENT: "Invalid placement!",
     NO_SHIPS: "No more ships available.",
-    RESTART_CONFIRM: "Are you sure you want to restart the game?"
+    RESTART_CONFIRM: "Are you sure you want to restart the game?",
   },
   COMPUTER_MOODS: {
     READY: "mood-look-down",
-    THINKING: "mood-puzzled", 
+    THINKING: "mood-puzzled",
     HIT_BY_PLAYER: "mood-cry",
     SHIP_SUNK_BY_PLAYER: "mood-wrrr",
     HIT_PLAYER: "mood-smile",
     SUNK_PLAYER_SHIP: "mood-happy",
     LOST: "mood-sad-dizzy",
-    WON: "mood-tongue"
+    WON: "mood-tongue",
   },
   DIRECTIONS: [
     { x: 0, y: -1 }, // North
-    { x: 1, y: 0 },  // East
-    { x: 0, y: 1 },  // South
-    { x: -1, y: 0 }  // West
-  ]
+    { x: 1, y: 0 }, // East
+    { x: 0, y: 1 }, // South
+    { x: -1, y: 0 }, // West
+  ],
 };
 
 window.addEventListener("load", function () {
@@ -242,8 +242,12 @@ const sinkship = {
     controls.classList.add("controls");
 
     // Create buttons
-    this.restartButton = this.createButton("Restart", () => this.showRestartConfirmation());
-    this.autoPlaceButton = this.createButton("Auto Place Ships", () => this.autoPlaceShips());
+    this.restartButton = this.createButton("Restart", () =>
+      this.showRestartConfirmation()
+    );
+    this.autoPlaceButton = this.createButton("Auto Place Ships", () =>
+      this.autoPlaceShips()
+    );
     this.startButton = this.createButton("Start Game", null, true);
 
     controls.appendChild(this.restartButton);
@@ -258,16 +262,16 @@ const sinkship = {
     const button = document.createElement("button");
     button.textContent = text;
     button.classList.add("button");
-    
+
     if (disabled) {
       button.disabled = true;
       button.classList.add("disabled");
     }
-    
+
     if (clickHandler) {
       button.addEventListener("click", clickHandler);
     }
-    
+
     return button;
   },
 
@@ -289,7 +293,7 @@ const sinkship = {
   // Create menu table with ship options
   createMenuTable: function () {
     const table = document.createElement("table");
-    
+
     // Create header
     const thead = this.createTableHeader();
     table.appendChild(thead);
@@ -349,7 +353,7 @@ const sinkship = {
     // Create ship option cells
     const hCell = this.createShipOptionCell(ship, "horizontal");
     const vCell = this.createShipOptionCell(ship, "vertical");
-    
+
     row.appendChild(hCell);
     row.appendChild(vCell);
 
@@ -371,11 +375,11 @@ const sinkship = {
     const cell = document.createElement("td");
     const option = document.createElement("div");
     option.classList.add("ship-option");
-    
+
     if (orientation === "vertical") {
       option.classList.add("v");
     }
-    
+
     cell.appendChild(option);
 
     cell.addEventListener("click", () => {
@@ -411,14 +415,17 @@ const sinkship = {
       size: ship.size,
       orientation: orientation,
     };
-    
+
     // Add visual feedback for selected ship
     this.highlightSelectedShip(ship, orientation);
-    
+
     // Show selection message
-    const orientationText = orientation === "horizontal" ? "horizontal" : "vertical";
-    this.showMessage(`${ship.type} selected for ${orientationText} placement. Click on the grid to place it.`);
-    
+    const orientationText =
+      orientation === "horizontal" ? "horizontal" : "vertical";
+    this.showMessage(
+      `${ship.type} selected for ${orientationText} placement. Click on the grid to place it.`
+    );
+
     // Mark invalid cells for mobile after setting the selected ship
     if (this.isMobile) {
       this.markInvalidCells();
@@ -444,7 +451,7 @@ const sinkship = {
     this.clearShipSelection();
     this.removalMode = !this.removalMode;
     button.classList.toggle("active", this.removalMode);
-    
+
     // Update button text and show message
     if (this.removalMode) {
       button.textContent = "Exit Remove Mode";
@@ -453,7 +460,7 @@ const sinkship = {
       button.textContent = "Remove Ships";
       this.showMessage(GAME_CONFIG.MESSAGES.WELCOME);
     }
-    
+
     // Clear blocked cells when no ship is selected (mobile)
     if (this.isMobile && !this.selectedShip) {
       this.clearBlockedCells();
@@ -466,11 +473,23 @@ const sinkship = {
     if (!ship) return;
 
     const cells = this.playerField.cells;
-    const shipCells = this.getShipCells(startRow, startCol, ship.orientation, ship.size);
-    
+    const shipCells = this.getShipCells(
+      startRow,
+      startCol,
+      ship.orientation,
+      ship.size
+    );
+
     // Check if ship fits and can be placed
-    const isValid = this.isValidPlacement(startRow, startCol, ship.orientation, ship.size);
-    const className = isValid ? GAME_CONFIG.CELL_CLASSES.PREVIEW : GAME_CONFIG.CELL_CLASSES.BLOCKED;
+    const isValid = this.isValidPlacement(
+      startRow,
+      startCol,
+      ship.orientation,
+      ship.size
+    );
+    const className = isValid
+      ? GAME_CONFIG.CELL_CLASSES.PREVIEW
+      : GAME_CONFIG.CELL_CLASSES.BLOCKED;
 
     // Apply preview styling to valid cells
     shipCells.forEach(({ x, y }) => {
@@ -493,20 +512,28 @@ const sinkship = {
 
   // Check if coordinates are within bounds
   isInBounds: function (x, y) {
-    return x >= 0 && x < GAME_CONFIG.GRID_SIZE && y >= 0 && y < GAME_CONFIG.GRID_SIZE;
+    return (
+      x >= 0 && x < GAME_CONFIG.GRID_SIZE && y >= 0 && y < GAME_CONFIG.GRID_SIZE
+    );
   },
 
   // Check if placement is valid (fits in bounds and doesn't conflict with other ships)
   isValidPlacement: function (startRow, startCol, orientation, size) {
-    return this.shipFitsInBounds(startRow, startCol, orientation, size) &&
-           this.canPlaceShip(startRow, startCol, orientation, size);
+    return (
+      this.shipFitsInBounds(startRow, startCol, orientation, size) &&
+      this.canPlaceShip(startRow, startCol, orientation, size)
+    );
   },
 
   // Check if ship fits within grid bounds
   shipFitsInBounds: function (startRow, startCol, orientation, size) {
-    const endCol = orientation === "horizontal" ? startCol + size - 1 : startCol;
-    const endRow = orientation === "horizontal" ? startRow : startRow + size - 1;
-    return this.isInBounds(startCol, startRow) && this.isInBounds(endCol, endRow);
+    const endCol =
+      orientation === "horizontal" ? startCol + size - 1 : startCol;
+    const endRow =
+      orientation === "horizontal" ? startRow : startRow + size - 1;
+    return (
+      this.isInBounds(startCol, startRow) && this.isInBounds(endCol, endRow)
+    );
   },
 
   // Clear all preview classes from the field
@@ -529,7 +556,12 @@ const sinkship = {
     const ship = this.selectedShip;
     const inventory = this.shipInventory[ship.type];
     const shipId = `ship-${this.shipIdCounter++}`;
-    const shipCells = this.getShipCells(startRow, startCol, ship.orientation, ship.size);
+    const shipCells = this.getShipCells(
+      startRow,
+      startCol,
+      ship.orientation,
+      ship.size
+    );
 
     // Place ship on grid
     this.placeShipOnGrid(shipCells, ship, shipId);
@@ -552,7 +584,9 @@ const sinkship = {
       return false;
     }
 
-    if (!this.isValidPlacement(startRow, startCol, ship.orientation, ship.size)) {
+    if (
+      !this.isValidPlacement(startRow, startCol, ship.orientation, ship.size)
+    ) {
       this.showMessage(GAME_CONFIG.MESSAGES.INVALID_PLACEMENT);
       return false;
     }
@@ -569,9 +603,10 @@ const sinkship = {
       const cell = cells[y][x];
       cell.classList.remove(GAME_CONFIG.CELL_CLASSES.PREVIEW);
 
-      const className = ship.orientation === "horizontal"
-        ? `ship-${type}-${index}`
-        : `ship-${type}-v-${index}`;
+      const className =
+        ship.orientation === "horizontal"
+          ? `ship-${type}-${index}`
+          : `ship-${type}-v-${index}`;
 
       cell.dataset.shipId = shipId;
       cell.classList.add(className, GAME_CONFIG.CELL_CLASSES.OCCUPIED);
@@ -590,25 +625,31 @@ const sinkship = {
   // Handle logic after ship placement
   handlePostPlacement: function (inventory) {
     const shipType = this.selectedShip.type;
-    
+
     if (inventory.count === 0) {
       this.selectedShip = null;
       this.clearShipSelection();
-      
+
       // Check if ALL ships are placed
-      const allShipsPlaced = Object.values(this.shipInventory).every(entry => entry.count === 0);
-      
+      const allShipsPlaced = Object.values(this.shipInventory).every(
+        (entry) => entry.count === 0
+      );
+
       if (allShipsPlaced) {
-        this.showMessage("All ships placed. Press 'Start Game' to begin battle.");
+        this.showMessage(
+          "All ships placed. Press 'Start Game' to begin battle."
+        );
       } else {
         this.showMessage(`${shipType} placed! No more ${shipType}s available.`);
       }
-      
+
       if (this.isMobile) {
         this.clearBlockedCells();
       }
     } else {
-      this.showMessage(`${shipType} placed! ${inventory.count} more ${shipType}(s) available.`);
+      this.showMessage(
+        `${shipType} placed! ${inventory.count} more ${shipType}(s) available.`
+      );
     }
 
     if (this.isMobile && this.selectedShip) {
@@ -618,13 +659,13 @@ const sinkship = {
 
   // Update visual state of ship options based on availability
   updateShipOptionsVisibility: function () {
-    Object.keys(this.shipInventory).forEach(shipType => {
+    Object.keys(this.shipInventory).forEach((shipType) => {
       const inventory = this.shipInventory[shipType];
       const isAvailable = inventory.count > 0;
-      
+
       // Update all option cells for this ship type
       if (inventory.optionCells) {
-        inventory.optionCells.forEach(cell => {
+        inventory.optionCells.forEach((cell) => {
           if (isAvailable) {
             cell.classList.remove("disabled");
             cell.style.pointerEvents = "auto";
@@ -647,7 +688,7 @@ const sinkship = {
     // Find the correct option cell (horizontal = index 0, vertical = index 1)
     const targetIndex = orientation === "horizontal" ? 0 : 1;
     const targetCell = inventory.optionCells[targetIndex];
-    
+
     if (targetCell) {
       targetCell.classList.add("selected");
       targetCell.style.backgroundColor = "#17a2ff";
@@ -658,10 +699,10 @@ const sinkship = {
 
   // Clear all ship selection highlighting
   clearShipSelection: function () {
-    Object.keys(this.shipInventory).forEach(shipType => {
+    Object.keys(this.shipInventory).forEach((shipType) => {
       const inventory = this.shipInventory[shipType];
       if (inventory && inventory.optionCells) {
-        inventory.optionCells.forEach(cell => {
+        inventory.optionCells.forEach((cell) => {
           cell.classList.remove("selected");
           cell.style.backgroundColor = "";
           cell.style.borderColor = "";
@@ -669,7 +710,7 @@ const sinkship = {
         });
       }
     });
-    
+
     // Clear blocked cells when no ship is selected (mobile)
     if (this.isMobile && !this.selectedShip) {
       this.clearBlockedCells();
@@ -689,7 +730,12 @@ const sinkship = {
   // Check if a ship can be placed at the specified coordinates
   canPlaceShip: function (startRow, startCol, orientation, length) {
     const cells = this.playerField.cells;
-    const shipCells = this.getShipCells(startRow, startCol, orientation, length);
+    const shipCells = this.getShipCells(
+      startRow,
+      startCol,
+      orientation,
+      length
+    );
 
     // Check each ship cell and its neighbors
     for (const { x, y } of shipCells) {
@@ -700,7 +746,10 @@ const sinkship = {
       // Check current cell and adjacent cells for conflicts
       const neighbors = this.getNeighborCells(x, y);
       for (const { x: nx, y: ny } of neighbors) {
-        if (this.isInBounds(nx, ny) && cells[ny][nx].classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED)) {
+        if (
+          this.isInBounds(nx, ny) &&
+          cells[ny][nx].classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED)
+        ) {
           return false;
         }
       }
@@ -791,10 +840,12 @@ const sinkship = {
       inventory.countCell.textContent = inventory.count;
       this.updateShipOptionsVisibility();
       this.checkIfAllShipsPlaced();
-      
+
       // Show success message
       const shipTypeName = type.charAt(0).toUpperCase() + type.slice(1);
-      this.showMessage(`${shipTypeName} removed. Click another ship to remove it or exit remove mode.`);
+      this.showMessage(
+        `${shipTypeName} removed. Click another ship to remove it or exit remove mode.`
+      );
     }
 
     if (this.isMobile) {
@@ -858,7 +909,7 @@ const sinkship = {
 
   // Disable setup phase controls
   disableSetupControls: function () {
-    [this.autoPlaceButton, this.startButton].forEach(button => {
+    [this.autoPlaceButton, this.startButton].forEach((button) => {
       button.disabled = true;
       button.classList.add("disabled");
     });
@@ -876,7 +927,10 @@ const sinkship = {
     this.computerField.cells.forEach((row, y) => {
       row.forEach((cell, x) => {
         cell.addEventListener("click", () => {
-          if (!cell.classList.contains(GAME_CONFIG.CELL_CLASSES.DISABLED) && this.playerTurn) {
+          if (
+            !cell.classList.contains(GAME_CONFIG.CELL_CLASSES.DISABLED) &&
+            this.playerTurn
+          ) {
             this.handlePlayerAttack(x, y);
           }
         });
@@ -904,15 +958,19 @@ const sinkship = {
   autoPlaceShips: function () {
     this.selectedShip = null;
     this.clearShipSelection();
-    
+
     try {
       this.resetPlayerField();
       this.placeShipsRandomlyWithRetry(this.playerField.cells, true);
       this.checkIfAllShipsPlaced();
-      this.showMessage("Ships automatically placed! Click 'Start Game' to begin battle.");
+      this.showMessage(
+        "Ships automatically placed! Click 'Start Game' to begin battle."
+      );
     } catch (error) {
       console.error("Failed to auto-place ships:", error);
-      this.showMessage("Failed to auto-place ships. Please try again or place them manually.");
+      this.showMessage(
+        "Failed to auto-place ships. Please try again or place them manually."
+      );
     }
   },
 
@@ -924,7 +982,7 @@ const sinkship = {
       inventory.count = inventory.originalCount;
       inventory.countCell.textContent = inventory.count;
     });
-    
+
     // Update ship option visibility
     this.updateShipOptionsVisibility();
 
@@ -932,9 +990,9 @@ const sinkship = {
     this.playerField.cells.flat().forEach((cell) => {
       resetShipCell(cell);
       cell.classList.remove(
-        GAME_CONFIG.CELL_CLASSES.WATER, 
-        GAME_CONFIG.CELL_CLASSES.PREVIEW, 
-        GAME_CONFIG.CELL_CLASSES.BLOCKED, 
+        GAME_CONFIG.CELL_CLASSES.WATER,
+        GAME_CONFIG.CELL_CLASSES.PREVIEW,
+        GAME_CONFIG.CELL_CLASSES.BLOCKED,
         GAME_CONFIG.CELL_CLASSES.MISS
       );
     });
@@ -946,57 +1004,80 @@ const sinkship = {
     const maxAttempts = 100;
     const warningThreshold = Math.floor(maxAttempts * 0.5); // 50% of limit
     const playerType = isPlayerField ? "Player" : "AI";
-    
+
     while (attempts < maxAttempts) {
       attempts++;
-      
+
       // Reset field before each attempt
       if (isPlayerField) {
         this.resetPlayerField();
       } else {
         this.clearComputerField(cells);
       }
-      
+
       if (this.placeShipsRandomly(cells, isPlayerField)) {
         // Success - log the result
         if (attempts > warningThreshold) {
-          console.warn(`${playerType} ship placement took ${attempts} attempts (>${warningThreshold} threshold)`);
+          console.warn(
+            `${playerType} ship placement took ${attempts} attempts (>${warningThreshold} threshold)`
+          );
         } else {
-          console.log(`${playerType} ship placement successful after ${attempts} attempt(s)`);
+          console.log(
+            `${playerType} ship placement successful after ${attempts} attempt(s)`
+          );
         }
         return;
       }
     }
-    
-    console.error(`${playerType} ship placement failed after ${maxAttempts} attempts`);
+
+    console.error(
+      `${playerType} ship placement failed after ${maxAttempts} attempts`
+    );
     throw new Error(`Failed to place all ships after ${maxAttempts} attempts`);
   },
 
   // Place ships randomly on given field (single attempt)
   placeShipsRandomly: function (cells, isPlayerField = false) {
     const orientations = ["horizontal", "vertical"];
-    const ships = isPlayerField ? Object.keys(this.shipInventory) : GAME_CONFIG.SHIPS;
+    const ships = isPlayerField
+      ? Object.keys(this.shipInventory)
+      : GAME_CONFIG.SHIPS;
 
-    const getShipData = isPlayerField 
-      ? (type) => ({ type, size: this.shipInventory[type].size, count: this.shipInventory[type].count })
+    const getShipData = isPlayerField
+      ? (type) => ({
+          type,
+          size: this.shipInventory[type].size,
+          count: this.shipInventory[type].count,
+        })
       : (ship) => ship;
 
-    const canPlaceFunction = isPlayerField 
-      ? (row, col, orientation, size) => this.canPlaceShip(row, col, orientation, size)
-      : (row, col, orientation, size) => this.canPlaceComputerShip(row, col, orientation, size, cells);
+    const canPlaceFunction = isPlayerField
+      ? (row, col, orientation, size) =>
+          this.canPlaceShip(row, col, orientation, size)
+      : (row, col, orientation, size) =>
+          this.canPlaceComputerShip(row, col, orientation, size, cells);
 
     const placeFunction = isPlayerField
       ? (row, col, orientation, size, type) => {
           this.selectedShip = { type, size, orientation };
           this.placeShip(row, col);
         }
-      : (row, col, orientation, size, type) => this.placeComputerShip(row, col, orientation, size, type, cells);
+      : (row, col, orientation, size, type) =>
+          this.placeComputerShip(row, col, orientation, size, type, cells);
 
     for (const shipData of ships) {
       const { type, size, count } = getShipData(shipData);
-      
+
       for (let i = 0; i < count; i++) {
-        if (!this.placeShipRandomly(orientations, canPlaceFunction, placeFunction, type, size)) {
+        if (
+          !this.placeShipRandomly(
+            orientations,
+            canPlaceFunction,
+            placeFunction,
+            type,
+            size
+          )
+        ) {
           return false;
         }
       }
@@ -1005,14 +1086,21 @@ const sinkship = {
   },
 
   // Attempt to place a single ship randomly
-  placeShipRandomly: function (orientations, canPlaceFunction, placeFunction, type, size) {
+  placeShipRandomly: function (
+    orientations,
+    canPlaceFunction,
+    placeFunction,
+    type,
+    size
+  ) {
     let placed = false;
     let attempts = 0;
     // Increase max attempts for individual ships since board is more crowded
     const maxAttempts = 200;
 
     while (!placed && attempts < maxAttempts) {
-      const orientation = orientations[Math.floor(Math.random() * orientations.length)];
+      const orientation =
+        orientations[Math.floor(Math.random() * orientations.length)];
       const row = Math.floor(Math.random() * GAME_CONFIG.GRID_SIZE);
       const col = Math.floor(Math.random() * GAME_CONFIG.GRID_SIZE);
 
@@ -1050,7 +1138,9 @@ const sinkship = {
   clearBlockedCells: function () {
     this.playerField.cells
       .flat()
-      .forEach((cell) => cell.classList.remove(GAME_CONFIG.CELL_CLASSES.BLOCKED));
+      .forEach((cell) =>
+        cell.classList.remove(GAME_CONFIG.CELL_CLASSES.BLOCKED)
+      );
   },
 
   // Auto place ships on computer field
@@ -1081,7 +1171,10 @@ const sinkship = {
 
       const neighbors = this.getNeighborCells(x, y);
       for (const { x: nx, y: ny } of neighbors) {
-        if (this.isInBounds(nx, ny) && cells[ny][nx].classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED)) {
+        if (
+          this.isInBounds(nx, ny) &&
+          cells[ny][nx].classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED)
+        ) {
           return false;
         }
       }
@@ -1111,7 +1204,7 @@ const sinkship = {
     cell.classList.remove(GAME_CONFIG.CELL_CLASSES.CLICKABLE);
 
     const isHit = cell.classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED);
-    
+
     if (isHit) {
       this.processPlayerHit(cell);
     } else {
@@ -1122,7 +1215,10 @@ const sinkship = {
 
     // Proceed to computer's turn if it's not player's turn anymore
     if (!this.playerTurn) {
-      setTimeout(() => this.computerTurn(), GAME_CONFIG.TIMING.COMPUTER_FIRST_TURN_DELAY);
+      setTimeout(
+        () => this.computerTurn(),
+        GAME_CONFIG.TIMING.COMPUTER_FIRST_TURN_DELAY
+      );
     }
   },
 
@@ -1252,9 +1348,15 @@ const sinkship = {
         this.markSunkShip(shipId, cells);
         if (this.checkGameOver()) return;
         this.resetAI();
-        setTimeout(() => this.computerTurn(), GAME_CONFIG.TIMING.COMPUTER_TURN_DELAY);
+        setTimeout(
+          () => this.computerTurn(),
+          GAME_CONFIG.TIMING.COMPUTER_TURN_DELAY
+        );
       } else {
-        setTimeout(() => this.computerTurn(), GAME_CONFIG.TIMING.COMPUTER_TURN_DELAY);
+        setTimeout(
+          () => this.computerTurn(),
+          GAME_CONFIG.TIMING.COMPUTER_TURN_DELAY
+        );
       }
     } else {
       this.processComputerMiss(cell, target, state);
@@ -1264,7 +1366,9 @@ const sinkship = {
   isValidAttackCell: function (x, y) {
     return (
       this.isInBounds(x, y) &&
-      !this.playerField.cells[y][x].classList.contains(GAME_CONFIG.CELL_CLASSES.DISABLED)
+      !this.playerField.cells[y][x].classList.contains(
+        GAME_CONFIG.CELL_CLASSES.DISABLED
+      )
     );
   },
 
@@ -1321,7 +1425,7 @@ const sinkship = {
   // Add new targets for AI
   addNewTargets: function (target, state, cells) {
     const newTargets = this.getAdjacentCells(target.x, target.y, cells);
-    
+
     // Add only new, non-duplicate cells
     newTargets.forEach((nt) => {
       if (!state.targets.some((t) => t.x === nt.x && t.y === nt.y)) {
@@ -1343,7 +1447,10 @@ const sinkship = {
     );
 
     if (state.mode === "target" && state.targets.length > 0) {
-      setTimeout(() => this.computerTurn(), GAME_CONFIG.TIMING.COMPUTER_TURN_DELAY);
+      setTimeout(
+        () => this.computerTurn(),
+        GAME_CONFIG.TIMING.COMPUTER_TURN_DELAY
+      );
     } else {
       this.playerTurn = true;
       this.resetAI();
@@ -1418,7 +1525,12 @@ const sinkship = {
       const className = isVertical
         ? `ship-${shipType}-v-${index}`
         : `ship-${shipType}-${index}`;
-      cell.classList.add(GAME_CONFIG.CELL_CLASSES.HIT, GAME_CONFIG.CELL_CLASSES.DISABLED, GAME_CONFIG.CELL_CLASSES.SUNK, className);
+      cell.classList.add(
+        GAME_CONFIG.CELL_CLASSES.HIT,
+        GAME_CONFIG.CELL_CLASSES.DISABLED,
+        GAME_CONFIG.CELL_CLASSES.SUNK,
+        className
+      );
       applyShipSprite(
         cell,
         shipType,
@@ -1450,9 +1562,11 @@ const sinkship = {
   // Get the number of remaining ships on the field
   getRemainingShips: function (cells) {
     const remainingShips = new Set();
-    cells.flat().forEach(cell => {
-      if (cell.classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED) &&
-          !cell.classList.contains(GAME_CONFIG.CELL_CLASSES.HIT)) {
+    cells.flat().forEach((cell) => {
+      if (
+        cell.classList.contains(GAME_CONFIG.CELL_CLASSES.OCCUPIED) &&
+        !cell.classList.contains(GAME_CONFIG.CELL_CLASSES.HIT)
+      ) {
         remainingShips.add(cell.dataset.shipId);
       }
     });
@@ -1462,14 +1576,14 @@ const sinkship = {
   // End the game with a message and restart option
   endGame: function (message) {
     this.playerTurn = false;
-    
+
     // Update computer mood based on who won
     if (message === GAME_CONFIG.MESSAGES.PLAYER_WIN) {
       this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.LOST);
     } else if (message === GAME_CONFIG.MESSAGES.COMPUTER_WIN) {
       this.updateComputerMood(GAME_CONFIG.COMPUTER_MOODS.WON);
     }
-    
+
     this.disableComputerField();
     this.showGameEndPopup(message);
   },
@@ -1524,18 +1638,18 @@ const sinkship = {
   createPopupMoodDisplay: function () {
     const moodContainer = this.makeDiv();
     moodContainer.classList.add("popup-mood");
-    
+
     const moodLabel = document.createElement("span");
     moodLabel.textContent = "CPU: ";
     moodLabel.classList.add("popup-mood-label");
-    
+
     const moodIcon = document.createElement("div");
     moodIcon.classList.add("popup-mood-icon");
     moodIcon.innerHTML = this.getMoodSVG(this.currentComputerMood);
-    
+
     moodContainer.appendChild(moodLabel);
     moodContainer.appendChild(moodIcon);
-    
+
     return moodContainer;
   },
 
@@ -1554,7 +1668,7 @@ const sinkship = {
       direction: null,
       targets: [],
     };
-    
+
     // Clear any blocked cells from mobile mode
     if (this.isMobile) {
       this.clearBlockedCells();
@@ -1673,7 +1787,7 @@ const sinkship = {
       if (orientation === "horizontal") nx += i;
       else ny += i;
 
-              if (!this.isInBounds(nx, ny)) return false;
+      if (!this.isInBounds(nx, ny)) return false;
 
       const cell = cells[ny][nx];
       if (
@@ -1691,18 +1805,18 @@ const sinkship = {
   createComputerMoodDisplay: function () {
     const moodContainer = this.makeDiv();
     moodContainer.classList.add("computer-mood");
-    
+
     const moodLabel = document.createElement("span");
     moodLabel.textContent = "CPU: ";
     moodLabel.classList.add("mood-label");
-    
+
     const moodIcon = document.createElement("div");
     moodIcon.classList.add("mood-icon");
     moodIcon.innerHTML = this.getMoodSVG(this.currentComputerMood);
-    
+
     moodContainer.appendChild(moodLabel);
     moodContainer.appendChild(moodIcon);
-    
+
     return moodContainer;
   },
 
@@ -1718,14 +1832,14 @@ const sinkship = {
       if (!response.ok) {
         throw new Error(`Failed to load ${moodName}.svg`);
       }
-      
+
       let svgContent = await response.text();
-      
+
       svgContent = svgContent.replace(
         /<svg([^>]*)>/,
         '<svg$1 class="mood-svg">'
       );
-      
+
       this.svgCache[moodName] = svgContent;
       return svgContent;
     } catch (error) {
@@ -1769,7 +1883,10 @@ function applyShipSprite(cell, type, orientation, index, isSunk = false) {
   cell.classList.add(GAME_CONFIG.CELL_CLASSES.SHIP);
 
   if (isSunk) {
-    cell.classList.add(GAME_CONFIG.CELL_CLASSES.SUNK, GAME_CONFIG.CELL_CLASSES.HIT);
+    cell.classList.add(
+      GAME_CONFIG.CELL_CLASSES.SUNK,
+      GAME_CONFIG.CELL_CLASSES.HIT
+    );
   }
 
   cell.style.backgroundImage = bgImage;
